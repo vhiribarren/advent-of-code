@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+import os
+
+INPUT_FILEPATH = os.path.join(os.path.dirname(__file__), "../inputs/day_2.txt")
 
 BATTLE_POINTS_1 = {
     ("A", "X"): 3 + 1,
@@ -25,12 +28,10 @@ BATTLE_POINTS_2 = {
     ("C", "Z"): 6 + 1,    
 }
 
-INPUT_FILENAME = "input.txt"
-
 
 def main():
 
-    with open(INPUT_FILENAME) as input: 
+    with open(INPUT_FILEPATH) as input: 
         rounds = [tuple(line.strip().split()) for line in input]
 
     score_1 = sum([BATTLE_POINTS_1[round] for round in rounds])

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
+import os
 
-INPUT_FILENAME = "input.txt"
+INPUT_FILEPATH = os.path.join(os.path.dirname(__file__), "../inputs/day_3.txt")
 
 
 def item_score(char):
@@ -16,7 +17,7 @@ def item_score(char):
 
 def main():
 
-    with open(INPUT_FILENAME) as input:
+    with open(INPUT_FILEPATH) as input:
         priority = 0
         for line in input:
             line.strip()
@@ -26,7 +27,7 @@ def main():
             priority += item_score(common_char)
         print(priority)
 
-    with open(INPUT_FILENAME) as input:
+    with open(INPUT_FILEPATH) as input:
         group_counter = 0;
         group = []
         priority = 0

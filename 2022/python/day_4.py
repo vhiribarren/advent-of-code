@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 
 
-INPUT_FILENAME = "input.txt"
+import os
+
+INPUT_FILEPATH = os.path.join(os.path.dirname(__file__), "../inputs/day_4.txt")
 
 
 def main():
 
     set_inputs = []
-    with open(INPUT_FILENAME) as input:
+    with open(INPUT_FILEPATH) as input:
         set_inputs = []
         for line in input:
             parsed_input = [elf.split("-") for elf in line.strip().split(",")]
