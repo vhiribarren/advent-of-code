@@ -1,11 +1,14 @@
 use std::error::Error;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::path::Path;
 
-const INPUT_FILENAME: &str = "input.txt";
+const INPUT_PATH_REL: &str = "../../../inputs/day_1.txt";
+const SRC_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/", file!());
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let file = File::open(INPUT_FILENAME)?;
+    let input_path = Path::new(SRC_PATH).parent().unwrap().join(INPUT_PATH_REL);
+    let file = File::open(input_path)?;
 
     let mut elves = Vec::<usize>::new();
 

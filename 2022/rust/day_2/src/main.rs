@@ -1,6 +1,8 @@
+use std::path::Path;
 use std::{collections::HashMap, fs::read_to_string};
 
-const INPUT_FILENAME: &str = "input.txt";
+const INPUT_PATH_REL: &str = "../../../inputs/day_2.txt";
+const SRC_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/", file!());
 
 fn main() {
     #[allow(clippy::identity_op)]
@@ -29,7 +31,8 @@ fn main() {
         (("C", "Z"), 6 + 1),
     ]);
 
-    let input = read_to_string(INPUT_FILENAME).unwrap();
+    let input_path = Path::new(SRC_PATH).parent().unwrap().join(INPUT_PATH_REL);
+    let input = read_to_string(input_path).unwrap();
     let rounds: Vec<_> = input
         .lines()
         .map(|s| s.trim())
