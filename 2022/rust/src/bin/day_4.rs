@@ -1,6 +1,5 @@
 use std::collections::HashSet;
 use std::fs::read_to_string;
-use std::ops::Range;
 use std::path::Path;
 
 const INPUT_PATH_REL: &str = "../../../inputs/day_4.txt";
@@ -16,11 +15,8 @@ fn main() {
             s.trim()
                 .split(',')
                 .map(|s| {
-                    let range_values = s.split('-').collect::<Vec<_>>();
-                    let range = Range::<u32> {
-                        start: range_values[0].parse().unwrap(),
-                        end: 1 + range_values[1].parse::<u32>().unwrap(),
-                    };
+                    let range_values = s.split('-').map(|v| v.parse::<u32>().unwrap()).collect::<Vec<_>>();
+                    let range = range_values[0]..=range_values[1];
                     range.into_iter().collect::<HashSet<_>>()
                 })
                 .collect::<Vec<_>>()
@@ -32,7 +28,7 @@ fn main() {
         .filter(|l| l[0].is_subset(&l[1]) || l[1].is_subset(&l[0]))
         .count();
     println!("{count_included_ranges}");
-    
+
     let count_overlap_ranges = input_set
         .iter()
         .filter(|l| !l[0].is_disjoint(&l[1]))
