@@ -8,8 +8,7 @@ INPUT_FILEPATH = os.path.join(os.path.dirname(__file__), "../inputs/day_6.txt")
 def look_for_n_distinct_chars(n, message):
     for idx in range(0, len(message)-n):
         if len(set(message[idx: idx+n])) == n:
-            break
-    return idx+n
+            return idx+n
 
 
 def main():
