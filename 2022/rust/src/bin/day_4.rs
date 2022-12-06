@@ -15,7 +15,10 @@ fn main() {
             s.trim()
                 .split(',')
                 .map(|s| {
-                    let range_values = s.split('-').map(|v| v.parse::<u32>().unwrap()).collect::<Vec<_>>();
+                    let range_values = s
+                        .split('-')
+                        .map(|v| v.parse::<u32>().unwrap())
+                        .collect::<Vec<_>>();
                     let range = range_values[0]..=range_values[1];
                     range.into_iter().collect::<HashSet<_>>()
                 })
