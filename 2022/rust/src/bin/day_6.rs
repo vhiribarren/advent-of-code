@@ -13,7 +13,7 @@ fn look_for_n_distinct_chars(n: usize, message: &[char]) -> usize {
             return idx + n;
         }
     }
-    panic!()
+    unreachable!()
 }
 
 fn main() {
