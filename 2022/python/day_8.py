@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+from itertools import repeat
 
 INPUT_FILEPATH = os.path.join(os.path.dirname(__file__), "../inputs/day_8.txt")
 
@@ -12,22 +13,18 @@ def main():
     x_len, y_len = len(grid[0]), len(grid)
     x_range, y_range = range (0, x_len), range (0, y_len)
 
+    scans = []
+    scans.extend([zip(repeat(x), y_range) for x in x_range])
+    scans.extend([zip(repeat(x), reversed(y_range)) for x in x_range])
+    scans.extend([zip(x_range, repeat(y)) for y in y_range])
+    scans.extend([zip(reversed(x_range), repeat(y)) for y in y_range])
     visible_trees = set()
-    def check_and_add_tree():
-        nonlocal min_height
-        if (new_height := grid[y][x]) > min_height:
-            min_height = new_height
-            visible_trees.add((x, y))
-    for y in y_range:
-        for x_scan_pos in [x_range, reversed(x_range)]:
-            min_height = -1
-            for x in x_scan_pos:
-                check_and_add_tree()
-    for x in x_range:
-        for y_scan_pos in [y_range, reversed(y_range)]:        
-            min_height = -1
-            for y in y_scan_pos:
-                check_and_add_tree()
+    for line_scan in scans:
+        min_height = -1
+        for x, y in line_scan:
+            if (new_height := grid[y][x]) > min_height:
+                min_height = new_height
+                visible_trees.add((x, y))
     print("Visible trees:", len(visible_trees))
 
     scenic_scores = []
