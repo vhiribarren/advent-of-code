@@ -14,23 +14,43 @@ def main():
     xreg = 1
     cycle = 0
     sig_strength = 0
-    def check_cycle():
-        nonlocal sig_strength
+    def next_cycle():
+        nonlocal sig_strength, cycle
+        cycle += 1
         if cycle in scanned_cycles:
-            print(f"Cycle {cycle} with xreg {xreg}")
             sig_strength += cycle * xreg       
     for inst in input:
-        cycle += 1
-        check_cycle()
+        next_cycle()
         match inst:
             case ["noop"]:
                 pass
             case ["addx", val]:
-                cycle += 1
-                check_cycle()
+                next_cycle()
                 xreg += int(val)
     print("Signal strength:", sig_strength)
 
+    LINE_SIZE = 40
+    xreg = 1
+    cycle = 0
+    def update_and_draw_cycle():
+        nonlocal sig_strength, cycle
+        line_pos = cycle % LINE_SIZE
+        if line_pos == 0:
+            print("")
+        if xreg -1 <= line_pos <= xreg + 1:
+            print("#", end="")
+        else:
+            print(".", end="")
+        cycle += 1
+    for inst in input:
+        update_and_draw_cycle()
+        match inst:
+            case ["noop"]:
+                pass
+            case ["addx", val]:
+                update_and_draw_cycle()
+                xreg += int(val)
+    print("")
 
 if __name__ == "__main__":
     main()
