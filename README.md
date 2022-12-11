@@ -4,8 +4,8 @@ My participation to: https://adventofcode.com/
 
 ## Caveats
 
-Since all the material from Advent of Code is not free on use, test inputs and
-main inputs are also protected. So there is no unit tests or file input
+Since all the materials from Advent of Code is not free of use, test inputs and
+main inputs are also protected. So there are no unit tests or file inputs
 committed here.
 
 However, my solutions have hard coded reference to those inputs, so you cannot
