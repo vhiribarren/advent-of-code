@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
 import os
+import math
 from dataclasses import dataclass
 from operator import mul, add
+from copy import deepcopy
+
 
 INPUT_FILEPATH = os.path.join(os.path.dirname(__file__), "../inputs/day_11.txt")
 
@@ -37,9 +40,10 @@ def parse_operand(val: str, default: int):
         return default
 
 
-def compute_rounds(monkeys: list[Monkey], rounds_nb: int, with_worries: bool) -> list[int]:
+def compute_rounds(monkeys: list[Monkey], rounds_nb: int, with_relief: bool) -> list[int]:
     results: list[int] = [0] * len(monkeys)
-    for current_round in range(rounds_nb):
+    common_divisor = math.lcm(*[m.divisible for m in monkeys])
+    for _ in range(rounds_nb):
         for idx, m in enumerate(monkeys):
             results[idx] += len(m.items)
             match m.operation[1]:
@@ -48,12 +52,12 @@ def compute_rounds(monkeys: list[Monkey], rounds_nb: int, with_worries: bool) ->
                 case _: raise Exception()
             for item in m.items:
                 l, r = parse_operand(m.operation[0], item), parse_operand(m.operation[2], item)
-                score_without_worries = op(l, r)
-                new_score = score_without_worries  // 3 if with_worries else score_without_worries
-                next_monkey = m.if_true if new_score % m.divisible == 0 else m.if_false
+                raw_score = op(l, r)
+                new_score = (raw_score // 3) if with_relief else raw_score
+                new_score %= common_divisor
+                next_monkey = m.if_true if (new_score % m.divisible) == 0 else m.if_false
                 monkeys[next_monkey].items.append(new_score)
             m.items.clear()
-        print(current_round)
     return results
 
 
@@ -62,16 +66,15 @@ def main():
     with open(INPUT_FILEPATH) as file_content:
         monkeys = parse_input(file_content.read())
 
-    result = compute_rounds(monkeys, 20, True)
+    result = compute_rounds(deepcopy(monkeys), 20, True)
     result.sort()
     monkey_business = result[-1]*result[-2]
-    print(f"Monkey business: {monkey_business}")
+    print(f"Monkey business with 20 iter and with relief: {monkey_business}")
 
-
-    result = compute_rounds(monkeys, 10000, False)
+    result = compute_rounds(deepcopy(monkeys), 10000, False)
     result.sort()
     monkey_business = result[-1]*result[-2]
-    print(f"Monkey business: {monkey_business}")
+    print(f"Monkey business with 10000 iter and without relief: {monkey_business}")
 
 if __name__ == "__main__":
     main()
