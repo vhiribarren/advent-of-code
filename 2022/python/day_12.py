@@ -14,7 +14,7 @@ def get_height(height: str):
         case val: return ord(val)
 
 
-def compute_paths(grid, start_coord, end_coord):
+def compute_paths(grid, start_coord, end_coords, is_climbing):
 
     ylen, xlen = len(grid), len(grid[0])
     prev_coords = {start_coord: None}
@@ -39,7 +39,8 @@ def compute_paths(grid, start_coord, end_coord):
             yscan = y+dy
             if 0 <= xscan < xlen and 0 <= yscan < ylen:
                 scanned_height = get_height(grid[yscan][xscan])
-                if current_height + 1 >= scanned_height:
+                is_valid = current_height + 1 >= scanned_height if is_climbing else current_height <= scanned_height + 1
+                if is_valid:
                     if (candidate := (xscan, yscan)) not in visited_coords:
                         unvisited_coords.add(candidate)
                     if new_distance < dist_coords.get(candidate, math.inf):
@@ -47,15 +48,20 @@ def compute_paths(grid, start_coord, end_coord):
                         dist_coords[candidate] = new_distance
         visited_coords.add((x, y))
     
-    if end_coord not in prev_coords:
-        return math.inf
-    chain = []
-    last_pos = end_coord
-    while last_pos is not None:
-        chain.append(last_pos)
-        last_pos = prev_coords[last_pos]
+    min_steps = math.inf
+    for end_coord in end_coords:
+        if end_coord not in prev_coords:
+            continue
+        chain = []
+        last_pos = end_coord
+        while last_pos is not None:
+            chain.append(last_pos)
+            last_pos = prev_coords[last_pos]
+        steps = len(list(reversed(chain)))-1
+        if steps < min_steps:
+            min_steps = steps
 
-    return len(list(reversed(chain)))-1
+    return min_steps
 
 
 
@@ -72,20 +78,14 @@ def main():
             if grid[y][x] == "E":
                 end_coord = (x, y)
 
-    print("Best signal steps:", compute_paths(grid, start_coord, end_coord))
+    print("Best signal steps:", compute_paths(grid, start_coord, [end_coord], True))
 
     a_positions = []
     for y in range(ylen):
         for x in range(xlen):
             if grid[y][x] == "a" or grid[y][x] == "S":
                 a_positions.append((x, y))
-    min_steps = math.inf
-    for idx, a_position in enumerate(a_positions):
-        print(len(a_positions)-idx)
-        steps = compute_paths(grid, a_position, end_coord)
-        if steps < min_steps:
-            min_steps = steps
-    print("Minimal steps from a:", min_steps)
+    print("Best signal steps:", compute_paths(grid, end_coord, a_positions, False))
 
 if __name__ == "__main__":
     main()
