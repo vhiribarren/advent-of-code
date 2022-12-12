@@ -2,10 +2,10 @@
 
 import os
 import math
-from dataclasses import dataclass
 
 
 INPUT_FILEPATH = os.path.join(os.path.dirname(__file__), "../inputs/day_12.txt")
+
 
 def get_height(height: str):
     match height:
@@ -57,7 +57,7 @@ def compute_paths(grid, start_coord, end_coords, is_climbing):
         while last_pos is not None:
             chain.append(last_pos)
             last_pos = prev_coords[last_pos]
-        steps = len(list(reversed(chain)))-1
+        steps = len(chain)-1
         if steps < min_steps:
             min_steps = steps
 
@@ -86,6 +86,7 @@ def main():
             if grid[y][x] == "a" or grid[y][x] == "S":
                 a_positions.append((x, y))
     print("Best signal steps:", compute_paths(grid, end_coord, a_positions, False))
+
 
 if __name__ == "__main__":
     main()
