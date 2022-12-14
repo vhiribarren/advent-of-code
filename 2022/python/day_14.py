@@ -25,46 +25,18 @@ def parse_input(input):
     return grid
 
 
-def main():
-
-    with open(INPUT_FILEPATH) as f:
-        input = f.read()
-
-    orig_grid = parse_input(input)
-    bottom_pit = int(max(orig_grid, key=lambda c: c.imag).imag)
-    sand_origin = 500 + 0j
-
-    grid = deepcopy(orig_grid)
+def sand_algorithm(grid, sand_origin, bottom_pit, bottom_stop):
     iter = 0
+    sand_origin_reached = False
     while True:
         iter += 1
         sand = sand_origin
-        abyss_reached = False
+        bottom_reached = False
         while True:
-            if (c := sand + 1j) not in grid:
-                sand = c
-            elif (c := sand -1 + 1j) not in grid:
-                sand = c
-            elif (c := sand + 1 + 1j) not in grid:
-                sand = c
-            else:
-                grid.add(sand)
+            if bottom_stop and (sand+1j).imag == bottom_pit:
+                bottom_reached = True
+                iter -= 1
                 break
-            if sand.imag > bottom_pit:
-                abyss_reached = True
-                break
-        if abyss_reached:
-            break
-    print("Sand at rest:", iter-1)
-
-    grid = deepcopy(orig_grid)
-    iter = 0
-    bottom_pit += 2
-    while True:
-        iter += 1
-        sand = sand_origin
-        sand_origin_reached = False
-        while True:
             if (c := sand + 1j) not in grid and c.imag != bottom_pit:
                 sand = c
             elif (c := sand -1 + 1j) not in grid and c.imag != bottom_pit:
@@ -76,9 +48,22 @@ def main():
                 if sand == sand_origin:
                     sand_origin_reached = True
                 break
-        if sand_origin_reached:
+        if bottom_reached or sand_origin_reached:
             break
-    print("Sand at rest:", iter)
+    return iter
+
+
+def main():
+
+    with open(INPUT_FILEPATH) as f:
+        input = f.read()
+
+    orig_grid = parse_input(input)
+    bottom_pit = int(max(orig_grid, key=lambda c: c.imag).imag) + 2
+    sand_origin = 500 + 0j
+
+    print("Sand at rest without bottom:", sand_algorithm(deepcopy(orig_grid), sand_origin, bottom_pit, True))
+    print("Sand at rest with infinite bottom plan:", sand_algorithm(deepcopy(orig_grid), sand_origin, bottom_pit, False))
 
 
 if __name__ == "__main__":
