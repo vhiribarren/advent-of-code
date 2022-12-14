@@ -7,7 +7,7 @@ from copy import deepcopy
 INPUT_FILEPATH = os.path.join(os.path.dirname(__file__), "../inputs/day_14.txt")
 
 
-def parse_input(input):
+def parse_input(input: str) -> set[complex]:
     grid = set()
     for l in input.splitlines():
         rock_coords = [[int(v) for v in c.split(",")] for c in l.split(" -> ")]
@@ -25,7 +25,7 @@ def parse_input(input):
     return grid
 
 
-def sand_algorithm(grid, sand_origin, bottom_pit, bottom_stop):
+def sand_algorithm(grid: set[complex], sand_origin: complex, bottom_pit: int, bottom_stop: bool) -> int:
     iter = 0
     sand_origin_reached = False
     while True:
