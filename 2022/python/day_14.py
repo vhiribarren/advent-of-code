@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+from copy import deepcopy
 
 
 INPUT_FILEPATH = os.path.join(os.path.dirname(__file__), "../inputs/day_14.txt")
@@ -29,10 +30,11 @@ def main():
     with open(INPUT_FILEPATH) as f:
         input = f.read()
 
-    grid = parse_input(input)
-    bottom_pit = int(max(grid, key=lambda c: c.imag).imag)
+    orig_grid = parse_input(input)
+    bottom_pit = int(max(orig_grid, key=lambda c: c.imag).imag)
     sand_origin = 500 + 0j
 
+    grid = deepcopy(orig_grid)
     iter = 0
     while True:
         iter += 1
@@ -54,6 +56,29 @@ def main():
         if abyss_reached:
             break
     print("Sand at rest:", iter-1)
+
+    grid = deepcopy(orig_grid)
+    iter = 0
+    bottom_pit += 2
+    while True:
+        iter += 1
+        sand = sand_origin
+        sand_origin_reached = False
+        while True:
+            if (c := sand + 1j) not in grid and c.imag != bottom_pit:
+                sand = c
+            elif (c := sand -1 + 1j) not in grid and c.imag != bottom_pit:
+                sand = c
+            elif (c := sand + 1 + 1j) not in grid and c.imag != bottom_pit:
+                sand = c
+            else:
+                grid.add(sand)
+                if sand == sand_origin:
+                    sand_origin_reached = True
+                break
+        if sand_origin_reached:
+            break
+    print("Sand at rest:", iter)
 
 
 if __name__ == "__main__":
