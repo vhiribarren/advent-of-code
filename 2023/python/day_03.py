@@ -51,7 +51,7 @@ def part_2(input: str):
         for x_scan in [x-1, x+len(num)]:
             if (x_scan, y) in symbols:
                 update_adj_num((x_scan, y), int(num))
-    valid_gears = [prod(parts) for _, parts in adjacents_numbers.items() if len(parts) == 2]
+    valid_gears = [prod(parts) for parts in adjacents_numbers.values() if len(parts) == 2]
     print("Result Part 2:", sum(valid_gears))
 
 
