@@ -9,8 +9,8 @@ def part_1(input: str):
     points = []
     for line in input.splitlines():
         [winnings, draws] = line.split(":")[1].split("|")
-        winnings = set(winnings.strip().split())
-        draws = draws.strip().split()
+        winnings = set(winnings.split())
+        draws = draws.split()
         has_won = [d in winnings for d in draws]
         points.append(2**(s-1) if (s := sum(has_won)) > 0 else 0)
     print("Result part 1:", sum(points))
@@ -23,8 +23,8 @@ def part_2(input: str):
         cards[card_id] = cards.get(card_id, 0) + 1;
         card_id_total = cards[card_id]
         [winnings, draws] = game.split("|")
-        winnings = set(winnings.strip().split())
-        draws = draws.strip().split()
+        winnings = set(winnings.split())
+        draws = draws.split()
         has_won = [d in winnings for d in draws]
         for i in range(0, sum(has_won)):
             new_id = card_id + i + 1
