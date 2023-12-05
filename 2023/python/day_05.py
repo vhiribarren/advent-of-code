@@ -47,10 +47,50 @@ def part_1(input: str):
         soils.append(current_layer)
     print("Result Part 1:", min(soils))
                     
-                
+def split_range(check_range: tuple[int, int], ref_range: tuple[int, int]):
+    intersect = (max(check_range[0], ref_range[0]), min(check_range[1], ref_range[1]))
+    if intersect[1] < intersect[0]:
+        return (None, [check_range])
+    rest = []
+    before = (check_range[0], min(check_range[1], intersect[0]-1))
+    if before[0] <= before[1]:
+        rest.append(before)
+    after = (max(intersect[1]+1, check_range[0]), check_range[1])
+    if after[0] <= after[1]:
+        rest.append(after)
+    return (intersect, rest)
 
 def part_2(input: str):
-    ...
+    # Definitively not performant enough
+    # even if it took "only" 15 min on my computer on one thread
+
+    seed_info, layers = parse_input(input)
+    seed_ranges = []
+    for seed_ranges_idx in range(0, len(seed_info), 2 ):
+        seed_start = seed_info[seed_ranges_idx]
+        seed_end = seed_start + seed_info[seed_ranges_idx+1]
+        seed_ranges.append((seed_start, seed_end))
+
+    current_ranges = seed_ranges
+    next_layer_ranges = []
+    for layer in layers:
+        print("next")
+        for current_range in current_ranges:
+            intersect_found = False
+            for conv_elem in layer:
+                (intersect, rest) = split_range(current_range, (conv_elem.start, conv_elem.end))
+                if intersect is not None:
+                    intersect_found = True
+                    current_ranges.extend(rest)
+                    delta = conv_elem.target - conv_elem.start
+                    next_layer_ranges.append((intersect[0]+ delta, intersect[1]+ delta))
+            if not intersect_found:
+                next_layer_ranges.append(current_range)
+
+        current_ranges = next_layer_ranges
+        next_layer_ranges = []
+                    
+    print("Result Part 2:", min([r[0] for r in current_ranges]))
 
 
 if __name__ == "__main__":
