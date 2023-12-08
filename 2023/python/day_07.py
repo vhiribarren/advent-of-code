@@ -6,22 +6,26 @@ from collections import Counter
 INPUT_FILE = "day_07.txt"
 INPUT_FILEPATH = os.path.join(os.path.dirname(__file__), "..", "inputs", INPUT_FILE)
 
+type Bucket = list[list[str]]
+type Buckets = dict[str, Bucket]
+
+def init_buckets() -> Buckets:
+    types = ["five_kind", "four_kind", "full_house", "three_kind", "two_pair", "one_pair", "high_card"]
+    return {t: [] for t in types}
+
+def card_sort(buckets: Buckets, order_map: dict[str, int]) -> list[list[str]]:
+    sorted_hands = []
+    for bucket_hands in buckets.values():
+        bucket_hands.sort(key=lambda hand: [order_map[c] for c in list(hand[0])] )
+        sorted_hands.extend(bucket_hands)
+    sorted_hands.reverse()
+    return sorted_hands
 
 def part_1(input: str):
 
-    CARD_ORDER = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
-    CARD_ORDER_MAP = {v: k for k, v in enumerate(CARD_ORDER)}
-
+    card_order_map = {v: k for k, v in enumerate("AKQJT98765432")}
     hands = [line.split() for line in input.splitlines()]
-    buckets = {
-        "five_kind": [],
-        "four_kind": [],
-        "full_house": [],
-        "three_kind": [],
-        "two_pair": [],
-        "one_pair": [],
-        "high_card": [],
-    }
+    buckets = init_buckets()
 
     for hand in hands:
         card_count = Counter(hand[0])
@@ -34,31 +38,16 @@ def part_1(input: str):
             case [(_, 2), *_]: buckets["one_pair"].append(hand)
             case _: buckets["high_card"].append(hand)
 
-    sorted_hands = []
-    for bucket_hands in buckets.values():
-        bucket_hands.sort(key=lambda hand: [CARD_ORDER_MAP[c] for c in list(hand[0])] )
-        sorted_hands.extend(bucket_hands)
-    sorted_hands.reverse()
-
+    sorted_hands = card_sort(buckets, card_order_map)
     total_winnings = sum([(rank +1) * int(hand[1]) for rank, hand in enumerate(sorted_hands)])
     print("Result part 1:", total_winnings)
 
 
 def part_2(input: str):
 
-    CARD_ORDER = ['A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J']
-    CARD_ORDER_MAP = {v: k for k, v in enumerate(CARD_ORDER)}
-
+    card_order_map = {v: k for k, v in enumerate("AKQT98765432J")}
     hands = [line.split() for line in input.splitlines()]
-    buckets = {
-        "five_kind": [],
-        "four_kind": [],
-        "full_house": [],
-        "three_kind": [],
-        "two_pair": [],
-        "one_pair": [],
-        "high_card": [],
-    }
+    buckets = init_buckets()
 
     for hand in hands:
         card_count = Counter(hand[0])
@@ -76,12 +65,7 @@ def part_2(input: str):
             case [2, _]: buckets["one_pair"].append(hand)
             case _: buckets["high_card"].append(hand)
 
-    sorted_hands = []
-    for bucket_hands in buckets.values():
-        bucket_hands.sort(key=lambda hand: [CARD_ORDER_MAP[c] for c in list(hand[0])] )
-        sorted_hands.extend(bucket_hands)
-    sorted_hands.reverse()
-
+    sorted_hands = card_sort(buckets, card_order_map)
     total_winnings = sum([(rank +1) * int(hand[1]) for rank, hand in enumerate(sorted_hands)])
     print("Result part 2:", total_winnings)
 
