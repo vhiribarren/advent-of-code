@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
 import os
-import re
 from functools import reduce
 
 INPUT_FILE = "day_09.txt"
 INPUT_FILEPATH = os.path.join(os.path.dirname(__file__), "..", "inputs", INPUT_FILE)
 
-NODE_RE = re.compile(r"(\w+) = \((\w+), (\w+)\)")
 
 def part_1_and_2(input: str):
     histories = [[int(v) for v in l.split()] for l in input.splitlines()]
