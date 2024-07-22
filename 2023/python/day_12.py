@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 import os
-from itertools import product
-from typing import Generator
+from functools import cache
 
 INPUT_FILE = "day_12.txt"
 INPUT_FILEPATH = os.path.join(os.path.dirname(__file__), "..", "inputs", INPUT_FILE)
@@ -11,33 +10,61 @@ INPUT_FILEPATH = os.path.join(os.path.dirname(__file__), "..", "inputs", INPUT_F
 def part_1(input: str):
     result = 0
     for line in input.splitlines():
-        result += compute_spring_serie(line)
+        springs, records = parse_spring_line(line)
+        result += compute_possibilities(springs, records)
     print("Result part 1:", result)
 
-def compute_spring_serie(line: str) -> int:
-    result = 0
-    springs, records_str = line.split()
-    records = [int(r) for r in records_str.split(",")]
-    for candidate_serie in generate_candidates(springs):
-        counts = [len(group) for group in candidate_serie.split(".") if len(group) > 0]
-        if counts == records:
-            result += 1
-    return result
 
-def generate_candidates(input: str) -> Generator[str, None, None]:
-    spring_count = input.count("?")
-    for candidates in product(".#", repeat=spring_count):
-        candidates = list(candidates)
-        serie_attempt = ""
-        for c in input:
-            if c == "?":
-                serie_attempt += candidates.pop()
-            else:
-                serie_attempt += c
-        yield serie_attempt
-        
+def part_2(input: str):
+    result = 0
+    for line in input.splitlines():
+        springs, records = expand_and_parse_spring_line(line)
+        result += compute_possibilities(springs, records)
+    print("Result part 2:", result)
+
+
+@cache
+def compute_possibilities(springs: str, records: tuple[int]) -> int:
+    if len(springs) == 0:
+        if len(records) == 0 or (len(records) == 1 and records[0] == 0):
+            return 1
+        else:
+            return 0
+    if springs[0] == ".":
+        if len(records) > 0 and records[0] == 0:
+            records = records[1:]
+        return compute_possibilities(springs[1:], records)
+    if springs[0] == "#":
+        if len(records) == 0 or records[0] == 0:
+            return 0
+        fst_record = records[0] - 1
+        if fst_record > 0 and len(springs)> 1 and springs[1] != ".":
+            return compute_possibilities("#"+springs[2:], tuple([fst_record, *records[1:]]))
+        elif fst_record == 0:
+            return compute_possibilities(springs[1:], tuple([fst_record, *records[1:]]))
+        else:
+            return 0
+    if springs[0] == "?":
+        return compute_possibilities("."+springs[1:], records) + compute_possibilities("#"+springs[1:], records)
+    raise Exception("Cannot be reached")
+
+
+def parse_spring_line(input: str) -> tuple[str, tuple[int]]:
+    springs, records_str = input.split()
+    records = tuple(int(r) for r in records_str.split(","))
+    return springs, records
+
+
+def expand_and_parse_spring_line(input: str) -> tuple[str, tuple[int]]:
+    springs, records_str = input.split()
+    records_str = ((records_str + ",") *5)[:-1]
+    records = tuple(int(r) for r in records_str.split(","))
+    springs = ((springs + "?") *5)[:-1] 
+    return springs, records
+
 
 if __name__ == "__main__":
     with open(INPUT_FILEPATH) as f:
         input = f.read()
         part_1(input)
+        part_2(input)
