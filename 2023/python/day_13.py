@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import os
-from typing import Optional
 
 INPUT_FILE = "day_13.txt"
 INPUT_FILEPATH = os.path.join(os.path.dirname(__file__), "..", "inputs", INPUT_FILE)
@@ -12,28 +11,63 @@ def part_1(input: str):
     row_patterns, col_patterns = zip(*generate_hashed_patterns(input))
     for row_pattern in row_patterns:
         split_idx = search_symetry(row_pattern)
-        if split_idx:
-            result += 100*split_idx
+        if len(split_idx) > 0:
+            result += 100*list(split_idx)[0]
     for col_pattern in col_patterns:
         split_idx = search_symetry(col_pattern)
-        if split_idx:
-            result += split_idx
+        if len(split_idx) > 0:
+            result += list(split_idx)[0]
     print("Result 1:", result)
 
 
 def part_2(input: str):
-    ...
+    result = 0
+    for (row_pattern, col_pattern) in generate_hashed_patterns(input):
+        orig_row_split_idx = search_symetry(row_pattern)
+        orig_col_split_idx = search_symetry(col_pattern)
 
-def search_symetry(input: list[int]) -> Optional[int]:
+        for row_idx in range(0, len(row_pattern)):
+            found = False
+            for col_idx in range(0, len(col_pattern)):
+                candidate_pattern = row_pattern[:]
+                candidate_pattern[row_idx] =  candidate_pattern[row_idx] ^ pow(2, col_idx)
+                split_idx = search_symetry(candidate_pattern)
+                candidate_idx = split_idx - orig_row_split_idx
+                if len(candidate_idx) == 1:
+                    result += 100*list(candidate_idx)[0]
+                    found = True
+                    break
+            if found:
+                break
+
+        for col_idx in range(0, len(col_pattern)):
+            found = False
+            for row_idx in range(0, len(row_pattern)):
+                candidate_pattern = col_pattern[:]
+                candidate_pattern[col_idx] =  candidate_pattern[col_idx] ^ pow(2, row_idx)
+                split_idx = search_symetry(candidate_pattern)
+                candidate_idx = split_idx - orig_col_split_idx
+                if len(candidate_idx) == 1:
+                    result += list(candidate_idx)[0]
+                    found = True
+                    break
+            if found:
+                break
+
+    print("Result 2:", result)
+
+
+def search_symetry(input: list[int]) -> set[int]:
+    result = set()
     for idx in range(1, len(input)):
         left = input[:idx]
         right = input[idx:]
         left.reverse()
-        min_size = min(len(left), len(right)) 
+        min_size = min(len(left), len(right))
         if left[:min_size] == right[:min_size]:
-            return idx
-    else:
-        return None
+            result.add(idx)
+    return result
+
 
 def generate_hashed_patterns(input: str) -> list[(list[int], list[int])]:
     hashed_patterns = []
