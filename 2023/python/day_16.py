@@ -31,24 +31,38 @@ class Beam(NamedTuple):
             case Direction.Down: return self.pos + 1j
             case _: assert_never() 
 
-def mirrorSlashEffect(current_dir: Direction) -> Direction:
+def mirror_slash_effect(current_dir: Direction) -> Direction:
     match current_dir:
         case Direction.Left: return Direction.Down
         case Direction.Right: return Direction.Up
         case Direction.Up: return Direction.Right
         case Direction.Down: return Direction.Left
 
-def mirrorSlashReverseEffect(current_dir: Direction) -> Direction:
+def mirror_slash_reverse_effect(current_dir: Direction) -> Direction:
     match current_dir:
         case Direction.Left: return Direction.Up
         case Direction.Right: return Direction.Down
         case Direction.Up: return Direction.Left
         case Direction.Down: return Direction.Right
 
+
 def part_1(input: str):
-    elements, width, height = extractElements(input)
+    print("Part 1:", beam_field(*extract_elements(input), Beam(-1+0j, Direction.Right)))
+
+def part_2(input: str):
+    elements, width, height = extract_elements(input)
+    score_candidates = []
+    for x in range(width):
+        score_candidates.append(beam_field(elements, width, height, Beam(x-1j, Direction.Down)))
+        score_candidates.append(beam_field(elements, width, height, Beam(x+height*1j, Direction.Up)))
+    for y in range(height):
+        score_candidates.append(beam_field(elements, width, height, Beam(-1+y*1j, Direction.Right)))
+        score_candidates.append(beam_field(elements, width, height, Beam(width+y*1j, Direction.Left)))
+    print("Part 2:", max(score_candidates))
+
+def beam_field(elements, width, height, init_beam: Beam) -> int:
     tiles: dict[complex, Direction] = {}
-    paths = [Beam(complex(-1, 0), Direction.Right)]
+    paths = [init_beam]
     def splitterHorizontalEffect():
         nonlocal curr_beam
         match curr_beam.dir:
@@ -77,21 +91,19 @@ def part_1(input: str):
             tiles[next_beam_pos] = tile_energy | curr_beam.dir
             match elements.get(next_beam_pos):
                 case Element.MirrorSlash:
-                    curr_beam = Beam(next_beam_pos, mirrorSlashEffect(curr_beam.dir))
+                    curr_beam = Beam(next_beam_pos, mirror_slash_effect(curr_beam.dir))
                 case Element.MirrorSlashReverse:
-                    curr_beam = Beam(next_beam_pos, mirrorSlashReverseEffect(curr_beam.dir))
+                    curr_beam = Beam(next_beam_pos, mirror_slash_reverse_effect(curr_beam.dir))
                 case Element.SplitterHorizontal:
                     splitterHorizontalEffect()
                 case Element.SplitterVertical:
                     splitterVerticalEffect()
                 case _:
                     curr_beam = Beam(next_beam_pos, curr_beam.dir)
-    print("Part 1:", len(tiles))
+    return len(tiles)
 
-def part_2(input: str):
-    ...
 
-def extractElements(input: str) -> dict[complex, Element]:
+def extract_elements(input: str) -> dict[complex, Element]:
     elements = {}
     for y, line in enumerate(input.splitlines()):
         for x, c in enumerate(line):
