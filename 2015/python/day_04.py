@@ -10,7 +10,7 @@ def solver(input: str, zero_nb: int) -> int:
     while True:
         test_val = input + str(ans_candidate)
         test_hash = hashlib.md5(test_val.encode()).hexdigest()
-        if test_hash[0:zero_nb] == "0" * zero_nb:
+        if test_hash.startswith("0" * zero_nb):
             return ans_candidate
         ans_candidate += 1 
 
