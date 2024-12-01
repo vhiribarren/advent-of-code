@@ -6,14 +6,9 @@ from collections import Counter
 INPUT_FILEPATH = op.join(op.dirname(__file__), "..", "inputs", f"{op.splitext(op.basename(__file__))[0]}.txt")
 
 
-def parse_input(input: str) -> tuple[list[int], list[int]]:
-    list_left = []
-    list_right = []
-    for line in input.splitlines():
-        left, right = map(int, line.split())
-        list_left.append(left)
-        list_right.append(right)
-    return list_left, list_right
+def parse_input(input: str) -> tuple[list[int], ...]:
+    zipped_result: zip[tuple[int, int]] = zip(*[map(int, line.split()) for line in input.splitlines()])
+    return tuple(map(list, zipped_result))
 
 def part_1(input: str):
     all_left, all_right = parse_input(input)
