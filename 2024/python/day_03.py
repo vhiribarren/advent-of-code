@@ -15,14 +15,14 @@ def part_2(input: str):
     enabled = True
     result = 0
     for inst in re.finditer(r"mul\((\d{1,3}),(\d{1,3})\)|do\(\)|don't\(\)", input):
-        match v := inst.group(0):
-            case v if v.startswith("mul"):
-                if enabled:
-                    result += int(inst.group(1)) * int(inst.group(2))
-            case v if v.startswith("don't"):
-                enabled = False
-            case v if v.startswith("do"):
-                enabled = True
+        v = inst.group(0)
+        if v.startswith("mul"):
+            if enabled:
+                result += int(inst.group(1)) * int(inst.group(2))
+        elif v.startswith("don't"):
+            enabled = False
+        elif v.startswith("do"):
+            enabled = True
     print("Part 2:", result)
 
 
