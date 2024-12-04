@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-INPUT_FILEPATH = (p:=Path(__file__)).parent/".."/"inputs"/p.with_suffix(".txt").name
+INPUT_FILEPATH = (p := Path(__file__)).parent/".."/"inputs"/f"{p.stem}.txt"
 
 
 # Quite complex, no time to do simpler for now
