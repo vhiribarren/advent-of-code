@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-import os.path as op
+from pathlib import Path
 
-INPUT_FILEPATH = op.join(op.dirname(__file__), "..", "inputs", f"{op.splitext(op.basename(__file__))[0]}.txt")
+INPUT_FILEPATH = (p:=Path(__file__)).parent/".."/"inputs"/p.with_suffix(".txt").name
 
 
 # Quite complex, no time to do simpler for now
