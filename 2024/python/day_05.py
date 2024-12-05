@@ -1,27 +1,24 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cmp_to_key
+from collections import defaultdict
 
 INPUT_FILEPATH = (p := Path(__file__)).parent/".."/"inputs"/f"{p.stem}.txt"
 
 
 @dataclass
 class Either:
-    left: set[str]
-    right: set[str]
+    left: set[str] = field(default_factory=set)
+    right: set[str] = field(default_factory=set)
 
 
 def solver(input: str):
-    rules: dict[str, Either] = dict()
+    rules: dict[str, Either] = defaultdict(Either)
     raw_rules, raw_updates = input.split("\n\n")
     for raw_rule in raw_rules.splitlines():
         l, r = raw_rule.split("|")
-        if rules.get(l) is None:
-            rules[l] = Either(set(), set())
-        if rules.get(r) is None:
-            rules[r] = Either(set(), set())
         rules[l].right.add(r)
         rules[r].left.add(l)
 
