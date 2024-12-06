@@ -18,12 +18,14 @@ def parser(input: str) -> tuple[complex, set[complex], int, int]:
     return (guard_pos, obstacles, x+1, y+1)
 
 
-def part_1(input: str):
-    guard_pos, obstacles, width, height = parser(input)
+def solver(input: str):
+    guard_pos_init, obstacles_init, width, height = parser(input)
+
+    guard_pos, obstacles = guard_pos_init, set(obstacles_init)
     direction = -1j
-    visited: set[complex] = set()
+    visited_part1: set[complex] = set()
     while True:
-        visited.add(guard_pos)
+        visited_part1.add(guard_pos)
         next_pos = guard_pos + direction
         if next_pos in obstacles:
             direction *= 1j
@@ -32,19 +34,13 @@ def part_1(input: str):
             break
         else:
             guard_pos = next_pos
-    print("Part 1:", len(visited))
+    print("Part 1:", len(visited_part1))
 
-
-def part_2(input: str):
-    guard_pos_init, obstacles_init, width, height = parser(input)
     obstructions_count = 0
+    for obst_new in visited_part1:
 
-    for obst_x, obst_y in product(range(0, width), range(0, height)):
-
-        obst_new = complex(obst_x, obst_y)
         if obst_new in obstacles_init or obst_new == guard_pos_init:
             continue
-
         direction = -1j
         visited: set[tuple[complex, complex]] = set() # position, direction
         guard_pos = guard_pos_init
@@ -69,5 +65,4 @@ def part_2(input: str):
 if __name__ == "__main__":
     with open(INPUT_FILEPATH) as input:
         all_input = input.read()
-        part_1(all_input)
-        part_2(all_input)
+        solver(all_input)
