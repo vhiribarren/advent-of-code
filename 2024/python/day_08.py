@@ -2,8 +2,8 @@
 
 from pathlib import Path
 from collections import defaultdict
-from itertools import product, count
-from typing import SupportsComplex, cast
+from itertools import combinations, count
+from typing import cast
 
 INPUT_FILEPATH = (p := Path(__file__)).parent/".."/"inputs"/f"{p.stem}.txt"
 
@@ -24,9 +24,7 @@ def part_1(input: str):
     antenna, width, height = parser(input)
     antinodes: set[complex] = set()
     for freq in antenna.keys():
-        for l, r in product(antenna[freq], repeat=2):
-            if l == r:
-                continue
+        for l, r in combinations(antenna[freq], 2):
             dir = l - r
             for candidate in [l + dir, r - dir]:
                 if valid_positions(candidate, width, height):
@@ -37,9 +35,7 @@ def part_2(input: str):
     antenna, width, height = parser(input)
     antinodes: set[complex] = set()
     for freq in antenna.keys():
-        for l, r in product(antenna[freq], repeat=2):
-            if l == r:
-                continue
+        for l, r in combinations(antenna[freq], 2):
             dir = l - r
             for scanner in [count(l, dir),  count(r, -dir)]:
                 for candidate in scanner:
