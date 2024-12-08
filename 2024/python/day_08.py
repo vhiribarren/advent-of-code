@@ -3,6 +3,7 @@
 from pathlib import Path
 from collections import defaultdict
 from itertools import product, count
+from typing import SupportsComplex, cast
 
 INPUT_FILEPATH = (p := Path(__file__)).parent/".."/"inputs"/f"{p.stem}.txt"
 
@@ -16,7 +17,7 @@ def parser(input: str) -> tuple[dict[str, list[complex]], int, int]:
     return result, x+1, y+1
 
 
-def valid_positions(position, width, height) -> bool:
+def valid_positions(position: complex, width: int, height: int) -> bool:
     return 0 <= position.real < width and 0 <= position.imag < height
 
 def part_1(input: str):
@@ -34,20 +35,18 @@ def part_1(input: str):
 
 def part_2(input: str):
     antenna, width, height = parser(input)
-    antinodes = set()
+    antinodes: set[complex] = set()
     for freq in antenna.keys():
         for l, r in product(antenna[freq], repeat=2):
             if l == r:
                 continue
             dir = l - r
-            for candidate in count(l, dir):
-                if not valid_positions(candidate, width, height):
-                    break
-                antinodes.add(candidate)
-            for candidate in count(r, -dir):
-                if not valid_positions(candidate, width, height):
-                    break
-                antinodes.add(candidate)      
+            for scanner in [count(l, dir),  count(r, -dir)]:
+                for candidate in scanner:
+                    candidate = cast(complex, candidate)
+                    if not valid_positions(candidate, width, height):
+                        break
+                    antinodes.add(candidate)     
     print("Part 2:", len(antinodes))
 
 
