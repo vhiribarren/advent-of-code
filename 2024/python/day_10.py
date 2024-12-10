@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-INPUT_FILEPATH = (p := Path(__file__)).parent/f"{p.stem}.txt"
+INPUT_FILEPATH = (p := Path(__file__)).parent/".."/"inputs"/f"{p.stem}.txt"
 
 
 def solver(input: str):
@@ -11,7 +11,7 @@ def solver(input: str):
     score_total = 0
     rating = 0
     for start in starts:
-        trails = set()
+        trails = set[complex]()
         def search_trails(current_pos, current_height, visited):
             nonlocal rating
             new_height = current_height + 1
