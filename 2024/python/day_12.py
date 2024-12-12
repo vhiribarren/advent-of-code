@@ -6,7 +6,7 @@ from collections import Counter
 INPUT_FILEPATH = (p := Path(__file__)).parent/".."/"inputs"/f"{p.stem}.txt"
 
 
-def create_regions(grid: dict[complex, str]) -> list[(str, set[complex])]:
+def create_regions(grid: dict[complex, str]) -> list[tuple[str, list[complex]]]:
     regions = []
     while len(grid) != 0:
         region = []
@@ -15,16 +15,16 @@ def create_regions(grid: dict[complex, str]) -> list[(str, set[complex])]:
             nonlocal region
             region.append(coord)
             del grid[coord]
-            for dir in [-1, 1, -1j, 1j]:
-                next_coord = coord + dir
+            for direction in [-1, 1, -1j, 1j]:
+                next_coord = coord + direction
                 if next_coord in grid and grid[next_coord] == plant:
                     consume_region(plant, next_coord)
         consume_region(plant, coord)
         regions.append((plant, region))
     return regions
 
-def compute_area(region: set[complex]) -> int:
-    counter = Counter()
+def compute_area(region: list[complex]) -> int:
+    counter = Counter[complex]()
     for coord in region:
         for delta in [-0.5, 0.5, -0.5j, 0.5j]:
             counter[coord + delta] += 1
@@ -38,45 +38,40 @@ def part_1(input_data: str):
     print("Part 1:", sum(p * a for p, a in zip(perimeters, area)))
 
 # ...kof...kof....... absolutely need to review this absolute monstruosity
-def compute_sides(region: set[complex]) -> int:
-    counter = Counter()
-    directions = dict()
+def compute_sides(region: list[complex]) -> int:
+    counter = Counter[complex]()
+    directions = dict[complex, complex]()
     for coord in region:
         for delta in [-0.5, 0.5, -0.5j, 0.5j]:
             barrier = coord + delta
             counter[barrier] += 1
             directions[barrier] = 2*delta
     borders = {c for c in counter if counter[c] == 1}
-    same_rows = list[set[complex]]()
-    same_columns = list[set[complex]]()
-    while len(borders) > 0:
+
+    same_rows = list[list[complex]]()
+    same_columns = list[list[complex]]()
+    while borders:
         border = borders.pop()
-        same_line = {border}
-        if border.real.is_integer():
-            for candidate_border in borders.copy():
-                if candidate_border.imag == border.imag:
-                    same_line.add(candidate_border)
-                    borders.remove(candidate_border)
-            same_line = sorted(same_line, key=lambda x: x.real)
-            same_rows.append(same_line)
-        else:
-            for candidate_border in borders.copy():
-                if candidate_border.real == border.real:
-                    same_line.add(candidate_border)
-                    borders.remove(candidate_border)
-            same_line = sorted(same_line, key=lambda x: x.imag)
-            same_columns.append(same_line)
+        line = {border}
+        if border.real.is_integer():    # Horizontal direction
+            line.update({b for b in borders if b.imag == border.imag})
+            same_rows.append(sorted(line, key=lambda x: x.real))
+        else:                           # Vertical direction
+            line.update({b for b in borders if b.real == border.real})
+            same_columns.append(sorted(line, key=lambda x: x.imag))
+        borders.difference_update(line)
+
     total = 0
     for row in same_rows:
-        prec_val = -100
-        for i in range(0, len(row)):
-            if row[i].real != prec_val.real +1 or directions[row[i]] != directions[prec_val]:
+        prec_val = None
+        for i in range(len(row)):
+            if prec_val is None or row[i].real != prec_val.real +1 or directions[row[i]] != directions[prec_val]:
                 total += 1
             prec_val = row[i]
     for column in same_columns:
-        prec_val = - 100j
-        for i in range(0, len(column)):
-            if column[i].imag != prec_val.imag +1 or directions[column[i]] != directions[prec_val]:
+        prec_val = None
+        for i in range(len(column)):
+            if prec_val is None or column[i].imag != prec_val.imag +1 or directions[column[i]] != directions[prec_val]:
                 total += 1
             prec_val = column[i]
     return total
