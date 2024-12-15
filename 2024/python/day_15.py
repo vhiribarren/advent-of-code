@@ -52,10 +52,7 @@ def part_1(input_data: str):
                         del grid[scanned_coord]
                         grid[scanned_coord + inst] = Box()
                     break
-    gps_list = []
-    for coord, elem in grid.items():
-        if isinstance(elem, Box):
-            gps_list.append(coord.real + 100*coord.imag)
+    gps_list = [coord.real + 100*coord.imag for coord, elem in grid.items() if isinstance(elem, Box)]
     print("Part 1:", int(sum(gps_list)))
 
 
@@ -111,9 +108,7 @@ def part_2(input_data: str):
             grid[box.left] = box          
             grid[box.right] = box          
 
-    gps_list = []
-    for box in boxes:
-        gps_list.append(box.left.real + 100*box.left.imag)
+    gps_list = [box.left.real + 100*box.left.imag for box in boxes]
     print("Part 2:", int(sum(gps_list)))
 
 
