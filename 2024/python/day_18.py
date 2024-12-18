@@ -35,7 +35,7 @@ def search_path(obstacles: list[complex]) -> Optional[int]:
 
     unvisited = [(node.score, next(COUNTER), node) for node in maze.values()]
     heapq.heapify(unvisited)
-    visited = []
+    visited = set[complex]()
 
     while len(unvisited) > 0:
         _, _, current_node = heapq.heappop(unvisited)
@@ -45,14 +45,14 @@ def search_path(obstacles: list[complex]) -> Optional[int]:
             return int(current_node.score)
         for direction in [1, -1j, -1, 1j]:
             next_node = maze.get(current_node.coord + direction)
-            if next_node is None or next_node in visited:
+            if next_node is None or next_node.coord in visited:
                 continue
             next_node_score = current_node.score +1
             if next_node_score < next_node.score:
                 next_node.prec = current_node
                 next_node.score = next_node_score
                 heapq.heappush(unvisited, (next_node.score, next(COUNTER), next_node))
-        visited.append(current_node)
+        visited.add(current_node.coord)
 
     return None
 
