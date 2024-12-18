@@ -2,6 +2,7 @@
 
 import math
 import heapq
+import bisect
 from pathlib import Path
 from dataclasses import dataclass
 from itertools import count
@@ -62,22 +63,16 @@ def part_1(input_data: str):
     print("Part 1", search_path(obstacles[:TAKE]))
 
 
+
 def part_2(input_data: str):
     """
     Bisect algorithm to find fastly the index when the path is closed.
     """
     obstacles = [complex(int(x), int(y)) for x, y in
-             (coord.split(",") for coord in input_data.splitlines())]
-    range_min = 0
-    range_max = len(obstacles)
-    while range_min < range_max:
-        range_middle = range_min + (range_max - range_min)//2
-        print("Testing", range_middle)
-        if search_path(obstacles[:range_middle]) is None:
-            range_max = range_middle
-        else:
-            range_min = range_middle +1
-    print("Part 2:", input_data.splitlines()[range_min-1])
+                 (coord.split(",") for coord in input_data.splitlines())]
+    threshold = bisect.bisect_right(
+        range(len(obstacles)), False,key=lambda mid: search_path(obstacles[:mid]) is None)
+    print("Part 2:", input_data.splitlines()[threshold-1])
 
 
 if __name__ == "__main__":
