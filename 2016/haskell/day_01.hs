@@ -1,19 +1,18 @@
 #!/usr/bin/env cabal
 
 {- cabal:
-build-depends: base, split
+    build-depends: base, split
 -}
 
 import Data.Complex
 import Data.List.Split (splitOn)
-import Data.Char (isSpace)
 
 problemFilename = "../inputs/day_01.txt"
 
 main :: IO()
 main = do
     input <- readFile problemFilename
-    let resultProb1 = solver input
+    let resultProb1 = solverProb1 input
     putStrLn $ "Problem 1: " ++ (show resultProb1)
 
 data Block = Block {
@@ -34,24 +33,25 @@ manhattanDistance (Block l _) (Block r _)= abs (imagPart l - imagPart r) + abs (
 
 parseInstructions :: String -> [Instruction]
 parseInstructions input =
-    let
-        splits = map (\x -> dropWhile isSpace x) $ splitOn "," input
+    let splits = map (head . words) $ splitOn "," input
     in map (\x -> buildInstruction (head x) (read $ tail x) ) splits
 
-applyInstruction :: Instruction -> Block -> Block
-applyInstruction instruction block = 
-    let (newDirection, distance) =
-            case instruction of
-                L distance -> ((0 :+ (-1)) * (direction block), distance)
-                R distance -> ((0 :+ 1) * (direction block), distance)
+applyInstruction :: Block -> Instruction -> Block
+applyInstruction block instruction =
+    let
+        distance = case instruction of
+            L d -> d
+            R d -> d
+        newDirection = case instruction of
+            L _ -> (0 :+ (-1)) * (direction block)
+            R _ -> (0 :+ 1) * (direction block)
     in Block { coord = coord block + (distance :+ 0) * newDirection, direction = newDirection }
 
-followInstructions :: [Instruction] -> Block -> Block
-followInstructions (instruction:xs) block = followInstructions xs $ applyInstruction instruction block
-followInstructions [] block = block
+followInstructions :: Block -> [Instruction] -> Block
+followInstructions = foldl applyInstruction
 
 shortestPath :: Block -> Double
-shortestPath targetBlock = manhattanDistance startBlock targetBlock
+shortestPath = manhattanDistance startBlock
 
-solver :: String -> Double
-solver input = shortestPath $ followInstructions (parseInstructions input) startBlock
+solverProb1 :: String -> Double
+solverProb1 input = shortestPath $ followInstructions startBlock (parseInstructions input)
