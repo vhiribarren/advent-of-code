@@ -1,9 +1,3 @@
-#!/usr/bin/env cabal
-
-{- cabal:
-    build-depends: base, split, containers
--}
-
 import Data.Complex
 import Data.List (find)
 import Data.List.Split (splitOn)
@@ -16,10 +10,8 @@ problemFilename = "../inputs/day_01.txt"
 main :: IO ()
 main = do
   input <- readFile problemFilename
-  let resultProb1 = solverProb1 input
-  putStrLn $ "Problem 1: " ++ show resultProb1
-  let resultProb2 = solverProb2 input
-  putStrLn $ "Problem 2: " ++ show resultProb2
+  putStrLn $ "Problem 1: " ++ show (solverProb1 input)
+  putStrLn $ "Problem 2: " ++ show (solverProb2 input)
 
 data Block = Block
   { coord :: Complex Double,
@@ -43,7 +35,7 @@ manhattanDistance (Block l _) (Block r _) = abs (imagPart l - imagPart r) + abs 
 parseInstructions :: String -> [Instruction]
 parseInstructions input =
   let splits = map (head . words) $ splitOn "," input
-   in map (\x -> buildInstruction (head x) (read $ tail x)) splits
+  in map (\x -> buildInstruction (head x) (read $ tail x)) splits
 
 applyInstruction :: Block -> Instruction -> [Block]
 applyInstruction block instruction =
