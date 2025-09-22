@@ -23,3 +23,7 @@ executable day_01
 executable day_02
     import:           exe-settings
     main-is:          day_02.hs
+
+executable day_03
+    import:           exe-settings
+    main-is:          day_03.hs
