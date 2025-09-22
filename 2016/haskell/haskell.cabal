@@ -19,3 +19,7 @@ executable day_01
     import:           exe-settings
     main-is:          day_01.hs
     build-depends:    containers, split
+
+executable day_02
+    import:           exe-settings
+    main-is:          day_02.hs
