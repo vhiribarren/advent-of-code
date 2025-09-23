@@ -27,3 +27,4 @@ executable day_02
 executable day_03
     import:           exe-settings
     main-is:          day_03.hs
+    build-depends:    split
