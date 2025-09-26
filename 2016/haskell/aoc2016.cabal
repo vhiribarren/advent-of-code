@@ -28,3 +28,8 @@ executable day_03
     import:           exe-settings
     main-is:          day_03.hs
     build-depends:    split
+
+executable day_04
+    import:           exe-settings
+    main-is:          day_04.hs
+    build-depends:    regex-tdfa
