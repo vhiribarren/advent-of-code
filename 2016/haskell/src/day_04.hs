@@ -1,4 +1,5 @@
-import Data.List (group, sort, sortBy)
+import Data.List (elemIndex, group, sort, sortBy)
+import Data.Maybe (fromJust)
 import Text.Regex.TDFA
 
 problemFilename :: String
@@ -16,6 +17,13 @@ main :: IO ()
 main = do
   input <- readFile problemFilename
   putStrLn $ "Problem 1: " ++ solverProb1 input
+  putStrLn $ "Problem 2: " ++ solverProb2 input
+
+solverProb1, solverProb2 :: String -> String
+solverProb1 input = show $ sum [sectorId room | room <- parse input, isValidRoom room]
+solverProb2 input =
+  let northPoleRoomSectorId = [sectorId room | room <- parse input, isNorthPoleObjectsRoom room]
+   in show $ head northPoleRoomSectorId
 
 rawIdToRoom :: String -> Room
 rawIdToRoom input =
@@ -34,5 +42,15 @@ computeChecksum room = take 5 $ map head $ sortBy (\l r -> length r `compare` le
 parse :: String -> [Room]
 parse input = map rawIdToRoom (lines input)
 
-solverProb1 :: String -> String
-solverProb1 input = show $ sum [sectorId room | room <- parse input, isValidRoom room]
+decrypt :: Room -> String
+decrypt room = map (decodeChar (sectorId room)) (encryptedName room)
+
+decodeChar :: Int -> Char -> Char
+decodeChar _ '-' = ' '
+decodeChar times char =
+  let targets = cycle ['a' .. 'z']
+      targetIndex = fromJust (elemIndex char targets) + (times `mod` 26)
+   in targets !! targetIndex
+
+isNorthPoleObjectsRoom :: Room -> Bool
+isNorthPoleObjectsRoom r = decrypt r == "northpole object storage" -- exact string found with grep after dump of results
