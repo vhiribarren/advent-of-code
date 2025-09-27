@@ -33,3 +33,9 @@ executable day_04
     import:           exe-settings
     main-is:          day_04.hs
     build-depends:    regex-tdfa
+
+executable day_05
+    import:           exe-settings
+    main-is:          day_05.hs
+    build-depends:    cryptohash-md5, bytestring, base16-bytestring
+ 
