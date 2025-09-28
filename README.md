@@ -16,7 +16,7 @@ folder.
 
 My personal solutions are published under the MIT license.
 
-Copyright 2022-2024 Vincent Hiribarreen
+Copyright 2022-2025 Vincent Hiribarreen
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
