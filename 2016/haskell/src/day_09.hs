@@ -10,9 +10,7 @@ solverProb1 :: String -> String
 solverProb1 = show . length . expandCompressed
 
 expandCompressed :: String -> String
-expandCompressed compressed =
-  let (_, expanded) = continueExpansion (compressed, [])
-   in expanded
+expandCompressed compressed = snd $ continueExpansion (compressed, [])
 
 continueExpansion :: (String, String) -> (String, String)
 continueExpansion ([], expanded) = ([], expanded)
