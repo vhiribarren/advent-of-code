@@ -3,6 +3,8 @@ import qualified Data.Map as Map
 import Data.List (isPrefixOf, partition, find)
 import Data.Maybe (fromJust)
 import Debug.Trace (traceShowId)
+import Control.Monad.State
+import Data.Bifunctor (first, second)
 
 problemFilename :: String
 problemFilename = "../inputs/day_10.txt"
@@ -20,6 +22,7 @@ data Bot = Bot
 type Bots = Map BotId Bot
 type Outputs = Map OutputId ElementId
 type Containers = (Bots, Outputs)
+type BotState = State Containers
 
 targetComboChip :: [ElementId]
 targetComboChip = [61, 17]
@@ -68,14 +71,14 @@ runSimulationUntil comboChip containers@(bots, _) =
   let bot = fromJust $ traceShowId $ findBotWith2Chips bots
    in if isBotFound comboChip bot
       then bot
-      else runSimulationUntil comboChip $ transferBotElements bot containers
+      else runSimulationUntil comboChip $ execState (transferBotElements bot) containers
 
 runFullSimulation :: Containers -> Containers
 runFullSimulation containers@(bots, _) =
-  let bot = traceShowId $ findBotWith2Chips bots
-   in case bot of
+  let maybeBot = traceShowId $ findBotWith2Chips bots
+   in case maybeBot of
         Nothing -> containers
-        Just b -> runFullSimulation $ transferBotElements b containers
+        Just bot -> runFullSimulation $ execState (transferBotElements bot) containers
 
 isBotFound :: [ElementId] -> Bot -> Bool
 isBotFound comboChip bot = all (`elem` botElements bot) comboChip
@@ -83,17 +86,13 @@ isBotFound comboChip bot = all (`elem` botElements bot) comboChip
 findBotWith2Chips :: Bots -> Maybe Bot
 findBotWith2Chips = fmap snd . find (\(_, v) -> length (botElements v) == 2) . Map.toList
 
-transferBotElements :: Bot -> Containers -> Containers
-transferBotElements bot (bots, outputs) =
-  let highVal = maximum $ botElements bot
-      lowVal = minimum $ botElements bot
-      lowTarget = low bot
-      highTarget = high bot
-      bots' = Map.update (\_ -> Just $ bot {botElements = []}) (botId bot) bots
-      (bots'', outputs'') = case lowTarget of
-        BotTarget i -> (passValToBot lowVal i bots', outputs)
-        OutputTarget i -> (bots', Map.insert i lowVal outputs)
-      result = case highTarget of
-        BotTarget i -> (passValToBot highVal i bots'', outputs'')
-        OutputTarget i -> (bots'', Map.insert i highVal outputs'')
-   in result
+transferBotElements :: Bot -> BotState ()
+transferBotElements bot = do
+  modify $ first $ clearBotElements bot
+  modifyBot (minimum $ botElements bot) (low bot)
+  modifyBot (maximum $ botElements bot) (high bot)
+  where
+    clearBotElements b = Map.adjust (const bot {botElements = []}) (botId b)
+    modifyBot :: ElementId -> Target -> BotState ()
+    modifyBot val (BotTarget i) = modify $ first (passValToBot val i)
+    modifyBot val (OutputTarget i) = modify $ second (Map.insert i val)
