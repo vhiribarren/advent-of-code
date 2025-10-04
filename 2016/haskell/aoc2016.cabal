@@ -55,4 +55,4 @@ executable day_09
 executable day_10
     import:           exe-settings
     main-is:          day_10.hs
-    build-depends:    containers
+    build-depends:    containers, mtl
