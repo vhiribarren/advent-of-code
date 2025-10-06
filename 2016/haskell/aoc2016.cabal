@@ -1,19 +1,19 @@
 cabal-version:      3.4
 name:               aoc2016
 version:            0.1.0.0
-synopsis: Advent of Code 2016 in Haskell
+synopsis:           Advent of Code 2016 in Haskell
 license:            MIT
 author:             Vincent Hiribarren
 build-type:         Simple
 
 common warnings
-    ghc-options: -Wall
+    ghc-options:      -Wall
 
 common exe-settings
-  import:            warnings
-  hs-source-dirs:    src
-  build-depends:     base >=4.14 && <5
-  default-language:  Haskell2010
+    import:            warnings
+    hs-source-dirs:    src
+    build-depends:     base >=4.14 && <5
+    default-language:  Haskell2010
 
 executable day_01
     import:           exe-settings
@@ -56,3 +56,8 @@ executable day_10
     import:           exe-settings
     main-is:          day_10.hs
     build-depends:    containers, mtl
+
+executable day_12
+    import:           exe-settings
+    main-is:          day_12.hs
+    build-depends:    containers
