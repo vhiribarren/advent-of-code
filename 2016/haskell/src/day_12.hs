@@ -22,15 +22,14 @@ main = do
   putStrLn $ "Problem 2: " ++ solverProb2 input
 
 solverProb1, solverProb2 :: String -> String
-solverProb1 = show . (Map.! "a") .runProgram registersInitP1
-solverProb2 = show . (Map.! "a") .runProgram registersInitP2
+solverProb1 = show . (Map.! "a") .runProgram registersInitP1 . map words . lines
+solverProb2 = show . (Map.! "a") .runProgram registersInitP2 . map words . lines
 
-runProgram :: Registers -> String -> Registers
+runProgram :: Registers -> [[String]] -> Registers
 runProgram r program =
-  let instructions = map words $ lines program
-      cpLine = getCodePointer r
-      instLine = instructions !! cpLine
-  in if cpLine < 0 || cpLine >= length instructions 
+  let cpLine = getCodePointer r
+      instLine = program !! cpLine
+  in if cpLine < 0 || cpLine >= length program 
      then r
      else runProgram (applyInstruction r instLine) program
 
