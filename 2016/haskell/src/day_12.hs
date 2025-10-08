@@ -1,7 +1,6 @@
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Text.Read
-import Debug.Trace (traceShowId)
 
 problemFilename :: String
 problemFilename = "../inputs/day_12.txt"
@@ -11,18 +10,20 @@ codePointerRegister = "cp"
 
 type Registers = Map String Int
 
-registersInit :: Registers
-registersInit = Map.fromList [(codePointerRegister, 0), ("a", 0),("b", 0),("c", 0),("d", 0)]
+registersInitP1, registersInitP2 :: Registers
+registersInitP1 = Map.fromList [(codePointerRegister, 0), ("a", 0),("b", 0),("c", 0),("d", 0)]
+registersInitP2 = Map.fromList [(codePointerRegister, 0), ("a", 0),("b", 0),("c", 1),("d", 0)]
+
 
 main :: IO ()
 main = do
   input <- readFile problemFilename
   putStrLn $ "Problem 1: " ++ solverProb1 input
-  -- putStrLn $ "Problem 2: " ++ solverProb2 input
+  putStrLn $ "Problem 2: " ++ solverProb2 input
 
 solverProb1, solverProb2 :: String -> String
-solverProb1 = show . (Map.! "a") .runProgram registersInit
-solverProb2 = undefined
+solverProb1 = show . (Map.! "a") .runProgram registersInitP1
+solverProb2 = show . (Map.! "a") .runProgram registersInitP2
 
 runProgram :: Registers -> String -> Registers
 runProgram r program =
@@ -31,7 +32,7 @@ runProgram r program =
       instLine = instructions !! cpLine
   in if cpLine < 0 || cpLine >= length instructions 
      then r
-     else runProgram (applyInstruction r instLine ) program
+     else runProgram (applyInstruction r instLine) program
 
 applyInstruction ::  Registers -> [String] -> Registers
 applyInstruction r ["cpy", x, y] = let val = getValOrRegister r x in
