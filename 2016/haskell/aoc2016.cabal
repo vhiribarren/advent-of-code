@@ -66,3 +66,8 @@ executable day_12
     import:           exe-settings
     main-is:          day_12.hs
     build-depends:    containers
+
+executable day_13
+    import:           exe-settings
+    main-is:          day_13.hs
+    build-depends:    containers
