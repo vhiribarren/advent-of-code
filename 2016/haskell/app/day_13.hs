@@ -22,28 +22,45 @@ initCoords, targetCoords :: Coords
 initCoords = (1, 1)
 targetCoords = (31, 39)
 
+maxSteps :: Int
+maxSteps = 50
+
 main :: IO ()
 main = do
   putStrLn $ "Problem 1: " ++ solverProb1
--- putStrLn $ "Problem 2: " ++ solverProb2 input
+  putStrLn $ "Problem 2: " ++ solverProb2
 
 solverProb1, solverProb2 :: String
 solverProb1 = show $ findTarget initCoords targetCoords
-solverProb2 = undefined
+solverProb2 = show $ findLocations initCoords maxSteps
 
 findTarget :: Coords -> Coords -> Int
 findTarget start end =
   let s = MazeState {candidates = Seq.singleton (start, 0), visited = Map.empty}
-   in exploreMaze s end
+   in exploreMazeUntilCoords s end
 
-exploreMaze :: MazeState -> Coords -> Int
-exploreMaze state target =
+findLocations :: Coords -> Int -> Int
+findLocations start maxSteps' =
+  let s = MazeState {candidates = Seq.singleton (start, 0), visited = Map.empty}
+   in length $ exploreMazeUntilSteps s maxSteps'
+
+exploreMazeUntilCoords :: MazeState -> Coords -> Int
+exploreMazeUntilCoords state target =
   let ((currentCoords, currentSteps) Seq.:<| candidates') = candidates state
       nextCandidates = generateCandidates (currentCoords, currentSteps) $ visited state
       state' = MazeState {candidates = candidates' Seq.>< Seq.fromList nextCandidates, visited = Map.insert currentCoords currentSteps $ visited state}
    in if currentCoords == target
         then currentSteps + 1
-        else exploreMaze state' target
+        else exploreMazeUntilCoords state' target
+
+exploreMazeUntilSteps :: MazeState -> Int -> Visited
+exploreMazeUntilSteps state maxSteps =
+  let ((currentCoords, currentSteps) Seq.:<| candidates') = candidates state
+      nextCandidates = generateCandidates (currentCoords, currentSteps) $ visited state
+      state' = MazeState {candidates = candidates' Seq.>< Seq.fromList nextCandidates, visited = Map.insert currentCoords currentSteps $ visited state}
+   in if currentSteps > maxSteps
+        then visited state
+        else exploreMazeUntilSteps state' maxSteps
 
 generateCandidates :: (Coords, Steps) -> Visited -> [(Coords, Steps) ]
 generateCandidates ((x, y), steps) v = [
