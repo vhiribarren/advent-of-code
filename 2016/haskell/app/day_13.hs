@@ -6,10 +6,9 @@ import qualified Data.Map as Map
 import Numeric (showIntAtBase)
 
 type Coords = (Int, Int)
-type CurrentCandidate = Coords
-type PrecCandidate = Maybe Coords
-type Candidates = Seq (CurrentCandidate, PrecCandidate)
-type Visited = Map CurrentCandidate PrecCandidate
+type Steps = Int
+type Candidates = Seq (Coords, Steps)
+type Visited = Map Coords Steps
 
 data MazeState = MazeState
   { candidates :: Candidates,
@@ -34,33 +33,28 @@ solverProb2 = undefined
 
 findTarget :: Coords -> Coords -> Int
 findTarget start end =
-  let s = MazeState {candidates = Seq.singleton (start, Nothing), visited = Map.empty}
+  let s = MazeState {candidates = Seq.singleton (start, 0), visited = Map.empty}
    in exploreMaze s end
 
 exploreMaze :: MazeState -> Coords -> Int
 exploreMaze state target =
-  let ((currentCoords, prec) Seq.:<| candidates') = candidates state
-      nextCandidates = generateCandidates currentCoords $ visited state
-      state' = MazeState {candidates = candidates' Seq.>< Seq.fromList nextCandidates, visited = Map.insert currentCoords prec $ visited state}
+  let ((currentCoords, currentSteps) Seq.:<| candidates') = candidates state
+      nextCandidates = generateCandidates (currentCoords, currentSteps) $ visited state
+      state' = MazeState {candidates = candidates' Seq.>< Seq.fromList nextCandidates, visited = Map.insert currentCoords currentSteps $ visited state}
    in if currentCoords == target
-        then chainLength currentCoords $ visited state'
+        then currentSteps + 1
         else exploreMaze state' target
 
-generateCandidates :: Coords -> Visited -> [(CurrentCandidate, PrecCandidate)]
-generateCandidates (x, y) v = [
-  (c, Just (x, y)) |
+generateCandidates :: (Coords, Steps) -> Visited -> [(Coords, Steps) ]
+generateCandidates ((x, y), steps) v = [
+  (c, s) |
     (dx, dy) <- [(0, 1), (0, -1), (-1, 0), (1, 0)],
     let c = (x + dx, y + dy),
+    let s = steps + 1,
     isOpenSpace c,
     c `Map.notMember` v,
     fst c >= 0,
     snd c >= 0]
-
-chainLength :: Coords -> Visited -> Int
-chainLength c v = case Map.lookup c v of
-  Nothing -> 0
-  Just Nothing -> 0
-  Just (Just p) -> 1 + chainLength p v
 
 isOpenSpace :: Coords -> Bool
 isOpenSpace (x, y) =
