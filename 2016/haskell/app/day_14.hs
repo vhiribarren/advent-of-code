@@ -15,16 +15,16 @@ main = do
   putStrLn $ "Problem 2: " ++ solverProb2
 
 solverProb1, solverProb2 :: String
-solverProb1 = show $ validHashIndexes !! 63
-solverProb2 = undefined
+solverProb1 = show $ validHashIndexes hashes  !! 63
+solverProb2 = show $ validHashIndexes strechedHashes  !! 63
 
-validHashIndexes :: [Int]
-validHashIndexes =
+validHashIndexes :: Hashes -> [Int]
+validHashIndexes hashes' =
   let go h idx =
         if checkHead h
           then idx:go (drop 1 h) (idx+1)
           else go (drop 1 h) (idx+1)
-  in go hashes 0
+  in go hashes' 0
 
 checkHead ::  Hashes -> Bool
 checkHead (x:xs) = case hasTriple x of
@@ -39,8 +39,9 @@ hasQuintuple = hasMultiple 5
 hasMultiple:: Int -> String -> Maybe Char
 hasMultiple n hash = head <$> find (\v -> length v >= n) (group hash)
 
-hashes :: Hashes
+hashes, strechedHashes :: Hashes
 hashes = fmap (\idx -> computeHash $ salt ++ show (idx::Int)) [0..]
+strechedHashes = fmap (\idx -> iterate computeHash (salt ++ show (idx::Int)) !! 2017) [0..]
 
 computeHash :: String -> String
 computeHash = BS.unpack . B16.encode . MD5.hash . BS.pack
