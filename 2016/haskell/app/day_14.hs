@@ -4,7 +4,7 @@ import qualified Data.ByteString.Char8 as BS
 import Data.List (group, find)
 import Data.Maybe (isJust)
 
-type Hashes = [String]
+type Hashes = [(Int, String)]
 
 salt :: String
 salt = "abc"
@@ -19,17 +19,15 @@ solverProb1 = show $ validHashIndexes hashes  !! 63
 solverProb2 = show $ validHashIndexes strechedHashes  !! 63
 
 validHashIndexes :: Hashes -> [Int]
-validHashIndexes hashes' =
-  let go h idx =
-        if checkHead h
-          then idx:go (drop 1 h) (idx+1)
-          else go (drop 1 h) (idx+1)
-  in go hashes' 0
+validHashIndexes h =
+  if checkHead h
+    then fst (head h):validHashIndexes (drop 1 h)
+    else validHashIndexes (drop 1 h)
 
 checkHead ::  Hashes -> Bool
-checkHead (x:xs) = case hasTriple x of
+checkHead ((_,x):xs) = case hasTriple x of
   Nothing -> False
-  Just c -> isJust $ find (\v -> hasQuintuple v == Just c) (take 1000 xs)
+  Just c -> isJust $ find (\(_,v) -> hasQuintuple v == Just c) (take 1000 xs)
 checkHead [] = error "Should not happen"
 
 hasTriple, hasQuintuple :: String -> Maybe Char
@@ -40,8 +38,8 @@ hasMultiple:: Int -> String -> Maybe Char
 hasMultiple n hash = head <$> find (\v -> length v >= n) (group hash)
 
 hashes, strechedHashes :: Hashes
-hashes = fmap (\idx -> computeHash $ salt ++ show (idx::Int)) [0..]
-strechedHashes = fmap (\idx -> iterate computeHash (salt ++ show (idx::Int)) !! 2017) [0..]
+hashes = zip [0..] $ fmap (\idx -> computeHash $ salt ++ show (idx::Int)) [0..]
+strechedHashes = zip [0..] $ fmap (\idx -> iterate computeHash (salt ++ show (idx::Int)) !! 2017) [0..]
 
 computeHash :: String -> String
 computeHash = BS.unpack . B16.encode . MD5.hash . BS.pack
