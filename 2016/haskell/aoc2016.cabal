@@ -80,3 +80,8 @@ executable day_14
 executable day_15
     import:           exe-settings
     main-is:          day_15.hs
+
+executable day_16
+    import:           exe-settings
+    main-is:          day_16.hs
+    build-depends:    split
