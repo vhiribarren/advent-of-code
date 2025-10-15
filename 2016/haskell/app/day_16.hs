@@ -5,6 +5,9 @@ problemFilename = "../inputs/day_16.txt"
 firstDiskSize :: Int
 firstDiskSize = 272
 
+secondDiskSize :: Int
+secondDiskSize = 35651584
+
 main :: IO ()
 main = do
   input <- readFile problemFilename
@@ -13,7 +16,7 @@ main = do
 
 solverProb1, solverProb2 :: String -> String
 solverProb1 = checksum . fullDataExpansion firstDiskSize
-solverProb2 = undefined
+solverProb2 = checksum . fullDataExpansion secondDiskSize
 
 expandData :: String -> String
 expandData a = a ++ "0" ++ b
