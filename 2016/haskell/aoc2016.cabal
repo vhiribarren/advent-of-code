@@ -85,3 +85,8 @@ executable day_16
     import:           exe-settings
     main-is:          day_16.hs
     build-depends:    split
+
+executable day_17
+    import:           exe-settings
+    main-is:          day_17.hs
+    build-depends:    cryptohash-md5, bytestring, base16-bytestring, containers
