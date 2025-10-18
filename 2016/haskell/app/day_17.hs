@@ -1,8 +1,6 @@
 import qualified Crypto.Hash.MD5 as MD5
 import qualified Data.ByteString.Base16 as B16
 import qualified Data.ByteString.Char8 as BS
-import Data.Map (Map)
-import qualified Data.Map as Map
 import Data.Sequence (Seq)
 import qualified Data.Sequence as Seq
 
@@ -24,18 +22,30 @@ main = do
   putStrLn $ "Problem 2: " ++ solverProb2 passcode
 
 solverProb1, solverProb2 :: String -> String
-solverProb1 initPass = extractPath initPass $ searchVault $ Seq.singleton (startCoords, initPass)
-solverProb2 = undefined
+solverProb1 initPass = extractPath initPass $ searchVaultShortest $ Seq.singleton (startCoords, initPass)
+solverProb2 initPass = show $ extractLength initPass $ searchVaultLongest "" $ Seq.singleton (startCoords, initPass)
 
--- ne pas oublier de filtrer ce qui est hors grille
-searchVault :: Candidates -> String
-searchVault candidates =
-  let ((currentCoords, currentPass) Seq.:<| candidates') = candidates
+searchVaultShortest :: Candidates -> String
+searchVaultShortest candidates = case Seq.viewl candidates of
+  Seq.EmptyL -> error "should not be reached"
+  (currentCoords, currentPass) Seq.:< candidates' -> 
+    let
       nextDirections = openDirections $ computeHash currentPass
       nextCandidates = [(c, p) | d <- nextDirections, let c = move d currentCoords, let p = currentPass ++ show d, validCoords c]
    in if currentCoords == endCoords
         then currentPass
-        else searchVault $ candidates' Seq.>< Seq.fromList nextCandidates
+        else searchVaultShortest $ candidates' Seq.>< Seq.fromList nextCandidates
+
+searchVaultLongest :: String -> Candidates -> String
+searchVaultLongest lastLongest candidates  = case Seq.viewl candidates of
+  Seq.EmptyL -> lastLongest
+  (currentCoords, currentPass) Seq.:< candidates' -> 
+    let
+      nextDirections = openDirections $ computeHash currentPass
+      nextCandidates = [(c, p) | d <- nextDirections, let c = move d currentCoords, let p = currentPass ++ show d, validCoords c]
+    in if currentCoords == endCoords
+        then searchVaultLongest currentPass candidates'
+        else searchVaultLongest lastLongest $ candidates' Seq.>< Seq.fromList nextCandidates
 
 move :: Direction -> Coords -> Coords
 move U (x, y) = (x, y - 1)
@@ -45,6 +55,9 @@ move R (x, y) = (x + 1, y)
 
 validCoords :: Coords -> Bool
 validCoords (x, y) = all (`elem` [0 .. 3]) [x, y]
+
+extractLength :: String -> String -> Int
+extractLength initPass endPass = length endPass - length initPass
 
 extractPath :: String -> String -> String
 extractPath initPass = drop (length initPass)
