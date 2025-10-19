@@ -24,19 +24,13 @@ parseInput = fmap convertChar
         convertChar _ = error "should not happen"
 
 countSafe :: [[Tile]] -> Int
-countSafe tileRows = length $ concatMap (filter (== Safe)) tileRows
-
-getTile :: [Tile] -> Int -> Tile
-getTile tiles idx
-  | idx < 0 = Safe
-  | idx >= length tiles = Safe
-  | otherwise = tiles !! idx
+countSafe = length . concatMap (filter (== Safe))
 
 nextRow :: [Tile] -> [Tile]
 nextRow precRow = fmap computeNextRow [0..length precRow -1] where
-  computeNextRow idx = case getTile precRow . (+idx) <$> [-1, 0, 1] of
-    [Trap, Trap, Safe] -> Trap
-    [Safe, Trap, Trap] -> Trap
-    [Safe, Safe, Trap] -> Trap
-    [Trap, Safe, Safe] -> Trap
+  computeNextRow idx = case zip3 (Safe:precRow) precRow (precRow++[Safe]) !! idx of
+    (Trap, Trap, Safe) -> Trap
+    (Safe, Trap, Trap) -> Trap
+    (Safe, Safe, Trap) -> Trap
+    (Trap, Safe, Safe) -> Trap
     _ -> Safe
