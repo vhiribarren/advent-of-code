@@ -6,9 +6,12 @@ import Control.Monad.State
 problemFilename :: String
 problemFilename = "../inputs/day_20.txt"
 
-data BlacklistDirection = L | R deriving (Show)
+data BlacklistDirection = L | R deriving (Show, Eq)
 type RangeBorder = (Int, BlacklistDirection)
 type Ranges = IntMap BlacklistDirection
+
+maxAddress :: Int
+maxAddress = 4294967295
 
 main :: IO ()
 main = do
@@ -18,7 +21,7 @@ main = do
 
 solverProb1, solverProb2 :: String -> String
 solverProb1 input = show $ findMin $ (-1, L) : IntMap.toList (mergeInput input)
-solverProb2 input = undefined
+solverProb2 input = show $ countAddresses $ (-1, L) : IntMap.toList (mergeInput input)
 
 mergeInput :: String -> Ranges
 mergeInput input = foldr (fillRanges . map read . splitOn "-") IntMap.empty (lines input)
@@ -45,3 +48,8 @@ findMin ranges@((l, L):(r, R):_) = if l /= r && l+1 /= r
   else findMin $ tail ranges
 findMin ranges@(_:_:_) = findMin $ tail ranges
 findMin _ = error "findMin - should not happen"
+
+countAddresses :: [RangeBorder] -> Int
+countAddresses ranges =
+  let couples = filter (\((_, rdir), _) -> rdir == R) $ zip ranges (tail ranges)
+   in 1 + maxAddress - foldl (\acc ((l, _), (r, _)) -> acc + r - l + 1) 0 couples
