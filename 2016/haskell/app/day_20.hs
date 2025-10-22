@@ -20,8 +20,8 @@ main = do
   putStrLn $ "Problem 2: " ++ solverProb2 input
 
 solverProb1, solverProb2 :: String -> String
-solverProb1 input = show $ findMin $ (-1, L) : IntMap.toList (mergeInput input)
-solverProb2 input = show $ countAddresses $ (-1, L) : IntMap.toList (mergeInput input)
+solverProb1 input = show $ findMin $ IntMap.toList (mergeInput input)
+solverProb2 input = show $ countAddresses $ IntMap.toList (mergeInput input)
 
 mergeInput :: String -> Ranges
 mergeInput input = foldr (fillRanges . map read . splitOn "-") IntMap.empty (lines input)
@@ -43,13 +43,11 @@ fillRanges [left, right] m = flip execState m $ do
 fillRanges _ _ = error "fillRanges - should not happen"
 
 findMin :: [RangeBorder] -> Int
-findMin ranges@((l, L):(r, R):_) = if l /= r && l+1 /= r
-  then l+1
-  else findMin $ tail ranges
-findMin ranges@(_:_:_) = findMin $ tail ranges
+findMin ((l, L):(r, R):_) | r > l + 1 = l + 1
+findMin (_:xs) = findMin xs
 findMin _ = error "findMin - should not happen"
 
 countAddresses :: [RangeBorder] -> Int
 countAddresses ranges =
-  let couples = filter (\((_, rdir), _) -> rdir == R) $ zip ranges (tail ranges)
-   in 1 + maxAddress - foldl (\acc ((l, _), (r, _)) -> acc + r - l + 1) 0 couples
+  let couples = [(fst l, fst r) | [l, r] <- chunksOf 2 ranges]
+   in 1 + maxAddress - foldl (\acc (l, r) -> acc + r - l + 1) 0 couples
