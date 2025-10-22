@@ -99,3 +99,8 @@ executable day_19
     import:           exe-settings
     main-is:          day_19.hs
     build-depends:    containers
+
+executable day_20
+    import:           exe-settings
+    main-is:          day_20.hs
+    build-depends:    containers, split, mtl
