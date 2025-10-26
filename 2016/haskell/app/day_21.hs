@@ -11,6 +11,9 @@ problemFilename = "../inputs/day_21.txt"
 initPassword :: String
 initPassword = "abcdefgh"
 
+endPassword :: String
+endPassword = "fbgdceah"
+
 type Parser a = Parsec Void String a
 
 data Instruction =
@@ -33,7 +36,9 @@ solverProb1, solverProb2 :: String -> String
 solverProb1 input = case parse parseInstructions "" input of
   Left err -> error (errorBundlePretty err)
   Right instructions -> foldl applyInstruction initPassword instructions
-solverProb2 input = undefined
+solverProb2 input = case parse parseInstructions "" input of
+  Left err -> error (errorBundlePretty err)
+  Right instructions -> foldl applyInstructionReverse endPassword (reverse instructions)
 
 parseInstructions :: Parser [Instruction]
 parseInstructions = parseInstruction `sepEndBy1` eol
@@ -83,6 +88,26 @@ applyInstruction input instr = case instr of
         (l, r) = splitAt x input
         (withRemovedLeft, withRemovedRight) = splitAt y $ l ++ tail r
     in withRemovedLeft ++ [letter] ++ withRemovedRight
+
+applyInstructionReverse :: String -> Instruction-> String
+applyInstructionReverse input instr = case instr of
+  SwapPosition x y ->
+    applyInstruction input (SwapPosition x y)
+  SwapLetter x y ->
+    applyInstruction input (SwapLetter x y)
+  RotateLeft x ->
+    applyInstruction input (RotateRight x)
+  RotateRight x ->
+    applyInstruction input (RotateLeft x)
+  RotatePosition x -> searchPosition input where
+    searchPosition candidate =
+      if input == applyInstruction candidate (RotatePosition x)
+      then candidate
+      else searchPosition $ applyInstruction candidate (RotateLeft 1)
+  Reverse x y ->
+    applyInstruction input (Reverse x y)
+  Move x y ->
+    applyInstruction input (Move y x)
 
 replaceNth :: Int -> Char -> String -> String
 replaceNth n newChar str =
