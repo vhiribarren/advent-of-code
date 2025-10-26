@@ -104,3 +104,8 @@ executable day_20
     import:           exe-settings
     main-is:          day_20.hs
     build-depends:    containers, split, mtl
+
+executable day_21
+    import:           exe-settings
+    main-is:          day_21.hs
+    build-depends:    megaparsec
