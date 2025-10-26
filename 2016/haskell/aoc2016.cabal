@@ -109,3 +109,8 @@ executable day_21
     import:           exe-settings
     main-is:          day_21.hs
     build-depends:    megaparsec
+
+executable day_22
+    import:           exe-settings
+    main-is:          day_22.hs
+    build-depends:    megaparsec
