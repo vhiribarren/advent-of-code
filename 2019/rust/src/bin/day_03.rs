@@ -16,8 +16,8 @@ static INPUT_FILE: LazyLock<PathBuf> = LazyLock::new(|| {
 
 fn main() -> Result<(), Box<dyn Error>> {
     let input = fs::read_to_string(&*INPUT_FILE)?;
-    println!("Problem 1: {}", problem_1(&input));
-    println!("Problem 2: {}", problem_2(&input));
+    println!("Problem 1: {}", problem_1(&input)?);
+    println!("Problem 2: {}", problem_2(&input)?);
     Ok(())
 }
 
@@ -47,7 +47,7 @@ fn map_direction(c: char) -> (isize, isize) {
     }
 }
 
-fn problem_1(input: &str) -> String {
+fn problem_1(input: &str) -> Result<String, Box<dyn Error>> {
     let all_instructions = input.lines().map(parse_line).collect::<Vec<_>>();
     let mut all_visited = Vec::<_>::new();
     for instructions in all_instructions {
@@ -63,14 +63,54 @@ fn problem_1(input: &str) -> String {
         }
         all_visited.push(visited);
     }
-    all_visited[0]
+    Ok(all_visited[0]
         .intersection(&all_visited[1])
         .map(|(x, y)| x.abs() + y.abs())
         .min()
         .unwrap()
-        .to_string()
+        .to_string())
 }
 
-fn problem_2(input: &str) -> String {
-    unimplemented!()
+fn problem_2(input: &str) -> Result<String, Box<dyn Error>> {
+    let all_instructions = input.lines().map(parse_line).collect::<Vec<_>>();
+    let mut all_visited = Vec::<_>::new();
+    for instructions in &all_instructions {
+        let mut visited = BTreeSet::<Coords>::new();
+        let mut current_coord = (0, 0);
+        for instruction in instructions {
+            let d = map_direction(instruction.dir);
+            for _ in 1..=instruction.dist {
+                current_coord.0 += d.0;
+                current_coord.1 += d.1;
+                visited.insert(current_coord);
+            }
+        }
+        all_visited.push(visited);
+    }
+    let result = all_visited[0]
+        .intersection(&all_visited[1])
+        .map(|intersect_coords| {
+            let mut step_count = 0;
+            for instructions in &all_instructions {
+                let mut current_coord = (0, 0);
+                'exit: for instruction in instructions {
+                    let d = map_direction(instruction.dir);
+                    for _ in 1..=instruction.dist {
+                        current_coord.0 += d.0;
+                        current_coord.1 += d.1;
+                        step_count += 1;
+                        if current_coord.0 == intersect_coords.0
+                            && current_coord.1 == intersect_coords.1
+                        {
+                            break 'exit;
+                        }
+                    }
+                }
+            }
+            step_count
+        })
+        .min()
+        .unwrap()
+        .to_string();
+    Ok(result)
 }
