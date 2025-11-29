@@ -27,7 +27,9 @@ fn problem_1(input: &str) -> Result<String, Box<dyn Error>> {
 }
 
 fn problem_2(input: &str) -> Result<String, Box<dyn Error>> {
-    unimplemented!()
+    let computer = &mut intcode::IntCodeComputer::from_input(input);
+    let result = computer.run_program(vec![5]);
+    Ok(result.first().unwrap().to_string())
 }
 
 pub mod intcode {
@@ -69,32 +71,71 @@ pub mod intcode {
             let mut inst_ptr = 0;
             loop {
                 let (opcode, mut modes) = Self::decode_inst(self.program[inst_ptr] as usize);
+                let params_ptr: usize = inst_ptr + 1;
                 match opcode {
-                    1 => {  // add
-                        let params_ptr: usize = inst_ptr + 1;
+                    // add
+                    1 => {
                         let val_left = self.fetch(params_ptr, modes.pop());
                         let val_right = self.fetch(params_ptr + 1, modes.pop());
                         let dest_idx = self.program[params_ptr + 2] as usize;
                         self.program[dest_idx] = val_left + val_right;
                         inst_ptr += 4
                     }
-                    2 => {  // multiply
-                        let params_ptr: usize = inst_ptr + 1;
+                    // multiply
+                    2 => {
                         let val_left = self.fetch(params_ptr, modes.pop());
                         let val_right = self.fetch(params_ptr + 1, modes.pop());
                         let dest_idx = self.program[params_ptr + 2] as usize;
                         self.program[dest_idx] = val_left * val_right;
                         inst_ptr += 4
                     }
-                    3 => {  // get input
-                        let dest_idx = self.program[inst_ptr + 1] as usize;
+                    // get input
+                    3 => {
+                        let dest_idx = self.program[params_ptr] as usize;
                         self.program[dest_idx] = input.pop_front().unwrap();
                         inst_ptr += 2
                     }
-                    4 => {  // write output
-                        let val = self.fetch(inst_ptr + 1, modes.pop());
+                    // write output
+                    4 => {
+                        let val = self.fetch(params_ptr, modes.pop());
                         output.push(val);
                         inst_ptr += 2
+                    }
+                    // jump-if-true
+                    5 => {
+                        let test = self.fetch(params_ptr, modes.pop());
+                        let new_inst_ptr = self.fetch(params_ptr + 1, modes.pop()) as usize;
+                        inst_ptr = if test != 0 {
+                            new_inst_ptr
+                        } else {
+                            inst_ptr + 3
+                        }
+                    }
+                    // jump-if-false
+                    6 => {
+                        let test = self.fetch(params_ptr, modes.pop());
+                        let new_inst_ptr = self.fetch(params_ptr + 1, modes.pop()) as usize;
+                        inst_ptr = if test == 0 {
+                            new_inst_ptr
+                        } else {
+                            inst_ptr + 3
+                        }
+                    }
+                    // less than
+                    7 => {
+                        let val_left = self.fetch(params_ptr, modes.pop());
+                        let val_right = self.fetch(params_ptr + 1, modes.pop());
+                        let dest_idx = self.program[params_ptr + 2] as usize;
+                        self.program[dest_idx] = if val_left < val_right { 1 } else { 0 };
+                        inst_ptr += 4
+                    }
+                    // equals
+                    8 => {
+                        let val_left = self.fetch(params_ptr, modes.pop());
+                        let val_right = self.fetch(params_ptr + 1, modes.pop());
+                        let dest_idx = self.program[params_ptr + 2] as usize;
+                        self.program[dest_idx] = if val_left == val_right { 1 } else { 0 };
+                        inst_ptr += 4
                     }
                     99 => break,
                     _ => unimplemented!(),
