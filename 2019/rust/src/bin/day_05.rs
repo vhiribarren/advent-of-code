@@ -52,6 +52,15 @@ pub mod intcode {
         }
     }
 
+    const OP_ADD: isize = 1;
+    const OP_MULTIPLY: isize = 2;
+    const OP_INPUT: isize = 3;
+    const OP_OUTPUT: isize = 4;
+    const OP_JUMP_IF_TRUE: isize = 5;
+    const OP_JUMP_IF_FALSE: isize = 6;
+    const OP_LESS_THAN: isize = 7;
+    const OP_EQUALS: isize = 8;
+    const OP_HALT: isize = 99;
     pub struct IntCodeComputer {
         pub program: Vec<IntCode>,
     }
@@ -73,36 +82,31 @@ pub mod intcode {
                 let (opcode, mut modes) = Self::decode_inst(self.program[inst_ptr] as usize);
                 let params_ptr: usize = inst_ptr + 1;
                 match opcode {
-                    // add
-                    1 => {
+                    OP_ADD => {
                         let val_left = self.fetch(params_ptr, modes.pop());
                         let val_right = self.fetch(params_ptr + 1, modes.pop());
                         let dest_idx = self.program[params_ptr + 2] as usize;
                         self.program[dest_idx] = val_left + val_right;
                         inst_ptr += 4
                     }
-                    // multiply
-                    2 => {
+                    OP_MULTIPLY => {
                         let val_left = self.fetch(params_ptr, modes.pop());
                         let val_right = self.fetch(params_ptr + 1, modes.pop());
                         let dest_idx = self.program[params_ptr + 2] as usize;
                         self.program[dest_idx] = val_left * val_right;
                         inst_ptr += 4
                     }
-                    // get input
-                    3 => {
+                    OP_INPUT => {
                         let dest_idx = self.program[params_ptr] as usize;
                         self.program[dest_idx] = input.pop_front().unwrap();
                         inst_ptr += 2
                     }
-                    // write output
-                    4 => {
+                    OP_OUTPUT => {
                         let val = self.fetch(params_ptr, modes.pop());
                         output.push(val);
                         inst_ptr += 2
                     }
-                    // jump-if-true
-                    5 => {
+                    OP_JUMP_IF_TRUE => {
                         let test = self.fetch(params_ptr, modes.pop());
                         let new_inst_ptr = self.fetch(params_ptr + 1, modes.pop()) as usize;
                         inst_ptr = if test != 0 {
@@ -111,8 +115,7 @@ pub mod intcode {
                             inst_ptr + 3
                         }
                     }
-                    // jump-if-false
-                    6 => {
+                    OP_JUMP_IF_FALSE => {
                         let test = self.fetch(params_ptr, modes.pop());
                         let new_inst_ptr = self.fetch(params_ptr + 1, modes.pop()) as usize;
                         inst_ptr = if test == 0 {
@@ -121,23 +124,21 @@ pub mod intcode {
                             inst_ptr + 3
                         }
                     }
-                    // less than
-                    7 => {
+                    OP_LESS_THAN => {
                         let val_left = self.fetch(params_ptr, modes.pop());
                         let val_right = self.fetch(params_ptr + 1, modes.pop());
                         let dest_idx = self.program[params_ptr + 2] as usize;
                         self.program[dest_idx] = if val_left < val_right { 1 } else { 0 };
                         inst_ptr += 4
                     }
-                    // equals
-                    8 => {
+                    OP_EQUALS => {
                         let val_left = self.fetch(params_ptr, modes.pop());
                         let val_right = self.fetch(params_ptr + 1, modes.pop());
                         let dest_idx = self.program[params_ptr + 2] as usize;
                         self.program[dest_idx] = if val_left == val_right { 1 } else { 0 };
                         inst_ptr += 4
                     }
-                    99 => break,
+                    OP_HALT => break,
                     _ => unimplemented!(),
                 }
             }
@@ -150,7 +151,7 @@ pub mod intcode {
             let mut encoded_modes = instruction / 100;
             while encoded_modes != 0 {
                 modes.push((encoded_modes % 10).into());
-                encoded_modes = encoded_modes / 10;
+                encoded_modes /= 10;
             }
             modes.reverse();
             (opcode as isize, modes)
@@ -159,8 +160,8 @@ pub mod intcode {
         fn fetch(&self, param_ptr: usize, mode: Option<Mode>) -> isize {
             let param_value = self.program[param_ptr];
             match mode.unwrap_or(Mode::Position) {
-                Mode::Position => self.program[param_value as usize] as isize,
-                Mode::Immediate => param_value as isize,
+                Mode::Position => self.program[param_value as usize],
+                Mode::Immediate => param_value,
             }
         }
     }
