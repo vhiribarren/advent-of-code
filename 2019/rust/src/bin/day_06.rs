@@ -22,6 +22,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 const START_OBJECT: &str = "COM";
+const SAN_OBJECT: &str = "SAN";
+const YOU_OBJECT: &str = "YOU";
 
 #[derive(Debug)]
 struct Orbit<'a> {
@@ -30,7 +32,7 @@ struct Orbit<'a> {
 }
 
 fn problem_1(input: &str) -> Result<String, Box<dyn Error>> {
-    let orbit_map = &parse_input(input);
+    let orbit_map = &parse_input_1(input);
     let bfs_orbits = &mut VecDeque::from([Orbit {
         distance: 0,
         object: START_OBJECT,
@@ -52,10 +54,29 @@ fn problem_1(input: &str) -> Result<String, Box<dyn Error>> {
 }
 
 fn problem_2(input: &str) -> Result<String, Box<dyn Error>> {
-    unimplemented!()
+    let parent_map = &parse_input_2(input);
+    let path_to_com = |start| {
+        let mut path = Vec::new();
+        let mut position = start;
+        while let Some(next_pos) = parent_map.get(position) {
+            path.push(next_pos);
+            position = next_pos;
+        }
+        path
+    };
+    let san_path = path_to_com(&SAN_OBJECT);
+    let you_path = path_to_com(&YOU_OBJECT);
+    let mut orbital_transfer = 0;
+    for (san_idx, san_orbit) in san_path.iter().enumerate() {
+        if let Some(you_idx) = you_path.iter().position(|y| y == san_orbit) {
+            orbital_transfer = you_idx + san_idx;
+            break;
+        }
+    }
+    Ok(orbital_transfer.to_string())
 }
 
-fn parse_input(input: &str) -> HashMap<&str, Vec<&str>> {
+fn parse_input_1(input: &str) -> HashMap<&str, Vec<&str>> {
     let mut orbits = HashMap::<&str, Vec<&str>>::new();
     input
         .lines()
@@ -64,4 +85,15 @@ fn parse_input(input: &str) -> HashMap<&str, Vec<&str>> {
             orbits.entry(v[0]).or_default().push(v[1]);
         });
     orbits
+}
+
+fn parse_input_2(input: &str) -> HashMap<&str, &str> {
+    let mut parents = HashMap::<&str, &str>::new();
+    input
+        .lines()
+        .map(|s| s.split(")").collect::<Vec<_>>())
+        .for_each(|v| {
+            parents.insert(v[1], v[0]);
+        });
+    parents
 }
