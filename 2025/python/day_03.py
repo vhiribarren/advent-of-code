@@ -5,7 +5,7 @@ from pathlib import Path
 INPUT_FILEPATH = (p := Path(__file__)).parent/".."/"inputs"/f"{p.stem}.txt"
 
 
-def max_battery(bank: list[str]) -> tuple[int, str]:
+def max_battery(bank: str) -> tuple[int, str]:
     return max(enumerate(bank), key=lambda b: int(b[1]))
 
 def collect_battery(bank: str, count: int) -> int:
