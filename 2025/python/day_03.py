@@ -6,11 +6,7 @@ INPUT_FILEPATH = (p := Path(__file__)).parent/".."/"inputs"/f"{p.stem}.txt"
 
 
 def max_battery(bank: list[str]) -> tuple[int, str]:
-    max_left = (0,"0")
-    for battery in enumerate(bank):
-        if int(battery[1]) > int(max_left[1]):
-            max_left = battery
-    return max_left
+    return max(enumerate(bank), key=lambda b: int(b[1]))
 
 def collect_battery(bank: str, count: int) -> int:
     selected = []
@@ -21,14 +17,14 @@ def collect_battery(bank: str, count: int) -> int:
         selected.append(max_left[1])
     return int(''.join(selected))
 
+def compute_joltage(input_data: str, count: int) -> int:
+    return sum([collect_battery(bank, count) for bank in input_data.splitlines()])
 
 def part_1(input_data: str):
-    result = sum([collect_battery(bank, 2) for bank in input_data.splitlines()])
-    print("Part 1:", result)
+    print("Part 1:", compute_joltage(input_data, 2))
 
 def part_2(input_data: str):
-    result = sum([collect_battery(bank, 12) for bank in input_data.splitlines()])
-    print("Part 2:", result)
+    print("Part 1:", compute_joltage(input_data, 12))
 
 
 if __name__ == "__main__":
