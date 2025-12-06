@@ -5,6 +5,7 @@ from math import prod
 
 INPUT_FILEPATH = (p := Path(__file__)).parent/".."/"inputs"/f"{p.stem}.txt"
 
+OPS = {"+": sum, "*": prod}
 
 def part_1(input_data: str):
     lines = input_data.splitlines()
@@ -13,9 +14,7 @@ def part_1(input_data: str):
     groups = list(zip(*nums))
     results = []
     for op, nums in zip(ops, groups):
-        match op:
-            case "+": results.append(sum(nums)) 
-            case "*": results.append(prod(nums)) 
+        results.append(OPS[op](nums))
     print("Part 1:", sum(results))
 
 def transpose(arr: list[str]) -> list[list[str]]:
@@ -33,9 +32,7 @@ def part_2(input_data: str):
         if len(n) != 0:
             group.append(int(n))
         else:
-            match ops.pop(0):
-                case "+": results.append(sum(group)) 
-                case "*": results.append(prod(group))
+            results.append(OPS[ops.pop(0)](group))
             group = []
     print("Part 2:", sum(results))
 
