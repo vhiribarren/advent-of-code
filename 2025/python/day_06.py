@@ -19,7 +19,9 @@ def part_1(input_data: str):
     print("Part 1:", sum(results))
 
 def transpose(arr: list[str]) -> list[list[str]]:
-    return [[arr[j][i] for j in range(len(arr))] for i in range(len(arr[0]))]
+    # was: return [[arr[j][i] for j in range(len(arr))] for i in range(len(arr[0]))]
+    # learnt this trick on reddit:
+    return list(zip(*arr))
 
 def part_2(input_data: str):
     lines = input_data.splitlines()
