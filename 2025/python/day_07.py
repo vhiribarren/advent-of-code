@@ -34,8 +34,7 @@ def part_1(input_data: str):
             continue
         elif next_beam in splitters:
             found_splitters.add(next_beam)
-            queue.appendleft(next_beam-1)
-            queue.appendleft(next_beam+1)
+            queue.extendleft([next_beam-1, next_beam+1])
         else:
             queue.appendleft(next_beam)
     result = len(found_splitters)
@@ -56,7 +55,6 @@ def part_2(input_data: str):
 
 
 if __name__ == "__main__":
-    with INPUT_FILEPATH.open() as file:
-        file_data = file.read()
-        part_1(file_data)
-        part_2(file_data)
+    file_data = INPUT_FILEPATH.read_text()
+    part_1(file_data)
+    part_2(file_data)
