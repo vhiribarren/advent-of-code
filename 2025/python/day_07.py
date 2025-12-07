@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from collections import deque
+from functools import cache
 
 INPUT_FILEPATH = (p := Path(__file__)).parent/".."/"inputs"/f"{p.stem}.txt"
 
@@ -40,9 +41,17 @@ def part_1(input_data: str):
     result = len(found_splitters)
     print("Part 1:", result)
 
-
 def part_2(input_data: str):
-    result = None
+    limit, start, splitters = parse_input(input_data)
+    @cache
+    def lifetimes_from_splitters(splitter_coord: complex) -> int:
+        while True:
+            splitter_coord += 1j
+            if splitter_coord.imag > limit:
+                return 1
+            if splitter_coord in splitters:
+                return lifetimes_from_splitters(splitter_coord -1) + lifetimes_from_splitters(splitter_coord +1)
+    result = lifetimes_from_splitters(start)
     print("Part 2:", result)
 
 
