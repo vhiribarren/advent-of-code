@@ -32,7 +32,13 @@ def part_1(input_data: str):
 
 
 def part_2(input_data: str):
-    result = None
+    reindeers = parse(input_data)
+    scores = [0]*len(reindeers)
+    for t in range(1, TARGET_TIME):
+        distances = [reindeer_dist(r, t) for r in reindeers]
+        lead = max(distances)
+        scores = [s + (d == lead) for (s, d) in zip(scores, distances)]
+    result = max(scores)
     print("Part 2:", result)
 
 
