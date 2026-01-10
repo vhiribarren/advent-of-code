@@ -31,7 +31,7 @@ def solver(input_data: str, with_calories: bool):
     for spoons in compositions(TOTAL_SPOON, prop_num):
         quantities = [[spoon*p for p in props] for (spoon, props) in zip(spoons, ingredients)]
         sum_quantities = [max(v, 0) for v in map(sum, zip(*quantities))]
-        if with_calories and sum_quantities[-1] != 500:
+        if with_calories and sum_quantities[-1] != TOTAL_CALORIES:
             continue
         scores.append(prod(sum_quantities[:-1]))
     return max(scores)
