@@ -1,8 +1,5 @@
 use std::{
-    error::Error,
-    fs,
-    path::{Path, PathBuf},
-    sync::LazyLock,
+    error::Error, fs, path::{Path, PathBuf}, sync::LazyLock,
 };
 
 use itertools::Itertools;
@@ -35,7 +32,27 @@ fn problem_1(input: &str) -> Result<String, Box<dyn Error>> {
 }
 
 fn problem_2(input: &str) -> Result<String, Box<dyn Error>> {
-    unimplemented!()
+    let outputs = &mut Vec::new();
+    let computer_template = intcode::IntCodeComputer::from_input(input);
+    for phases in (5..10).permutations(5) {
+        let mut amps: [_; 5] = std::array::from_fn(|_| computer_template.clone());
+        for (amp, phase) in amps.iter_mut().zip(&phases) {
+            amp.run_program(vec![*phase]);
+        }
+        let mut param = 0;
+        let mut last_signal = 0;
+        'l: loop {
+            for amp in amps.iter_mut() {
+                if amp.is_halted() {
+                    break 'l;
+                }
+                param = amp.run_program(vec![param])[0];
+            }
+            last_signal = param;
+        }
+        outputs.push(last_signal)
+    }
+    Ok(outputs.iter().max().unwrap().to_string())
 }
 
 pub mod intcode {
@@ -67,8 +84,12 @@ pub mod intcode {
     const OP_LESS_THAN: isize = 7;
     const OP_EQUALS: isize = 8;
     const OP_HALT: isize = 99;
+
+    #[derive(Clone)]
     pub struct IntCodeComputer {
         pub program: Vec<IntCode>,
+        pub inst_ptr: usize,
+        pub halted: bool,
     }
 
     impl IntCodeComputer {
@@ -77,57 +98,65 @@ pub mod intcode {
                 .split(',')
                 .map(|s| s.parse().expect("intcode parse error"))
                 .collect();
-            Self { program }
+            let inst_ptr = 0;
+            let halted = false;
+            Self { program, inst_ptr, halted }
+        }
+
+        pub fn is_halted(&self) -> bool {
+            self.halted
         }
 
         pub fn run_program(&mut self, input: Vec<isize>) -> Vec<isize> {
             let mut input = VecDeque::from(input);
             let mut output = Vec::new();
-            let mut inst_ptr = 0;
             loop {
-                let (opcode, mut modes) = Self::decode_inst(self.program[inst_ptr] as usize);
-                let params_ptr: usize = inst_ptr + 1;
+                let (opcode, mut modes) = Self::decode_inst(self.program[self.inst_ptr] as usize);
+                let params_ptr: usize = self.inst_ptr + 1;
                 match opcode {
                     OP_ADD => {
                         let val_left = self.fetch(params_ptr, modes.pop());
                         let val_right = self.fetch(params_ptr + 1, modes.pop());
                         let dest_idx = self.program[params_ptr + 2] as usize;
                         self.program[dest_idx] = val_left + val_right;
-                        inst_ptr += 4
+                        self.inst_ptr += 4
                     }
                     OP_MULTIPLY => {
                         let val_left = self.fetch(params_ptr, modes.pop());
                         let val_right = self.fetch(params_ptr + 1, modes.pop());
                         let dest_idx = self.program[params_ptr + 2] as usize;
                         self.program[dest_idx] = val_left * val_right;
-                        inst_ptr += 4
+                        self.inst_ptr += 4
                     }
                     OP_INPUT => {
+                        if input.is_empty() {
+                            break;
+                        }
                         let dest_idx = self.program[params_ptr] as usize;
                         self.program[dest_idx] = input.pop_front().unwrap();
-                        inst_ptr += 2
+                        self.inst_ptr += 2
                     }
                     OP_OUTPUT => {
                         let val = self.fetch(params_ptr, modes.pop());
                         output.push(val);
-                        inst_ptr += 2
+                        self.inst_ptr += 2
                     }
                     OP_JUMP_IF_TRUE => {
                         let test = self.fetch(params_ptr, modes.pop());
                         let new_inst_ptr = self.fetch(params_ptr + 1, modes.pop()) as usize;
-                        inst_ptr = if test != 0 {
+                        self.inst_ptr = if test != 0 {
                             new_inst_ptr
                         } else {
-                            inst_ptr + 3
+                            self.inst_ptr + 3
                         }
                     }
                     OP_JUMP_IF_FALSE => {
                         let test = self.fetch(params_ptr, modes.pop());
                         let new_inst_ptr = self.fetch(params_ptr + 1, modes.pop()) as usize;
-                        inst_ptr = if test == 0 {
+                        self.inst_ptr = if test == 0 {
                             new_inst_ptr
                         } else {
-                            inst_ptr + 3
+                            self.inst_ptr + 3
                         }
                     }
                     OP_LESS_THAN => {
@@ -135,16 +164,19 @@ pub mod intcode {
                         let val_right = self.fetch(params_ptr + 1, modes.pop());
                         let dest_idx = self.program[params_ptr + 2] as usize;
                         self.program[dest_idx] = if val_left < val_right { 1 } else { 0 };
-                        inst_ptr += 4
+                        self.inst_ptr += 4
                     }
                     OP_EQUALS => {
                         let val_left = self.fetch(params_ptr, modes.pop());
                         let val_right = self.fetch(params_ptr + 1, modes.pop());
                         let dest_idx = self.program[params_ptr + 2] as usize;
                         self.program[dest_idx] = if val_left == val_right { 1 } else { 0 };
-                        inst_ptr += 4
+                        self.inst_ptr += 4
                     }
-                    OP_HALT => break,
+                    OP_HALT => {
+                        self.halted = true;
+                        break
+                    },
                     _ => unimplemented!(),
                 }
             }
@@ -162,7 +194,6 @@ pub mod intcode {
             modes.reverse();
             (opcode as isize, modes)
         }
-
         fn fetch(&self, param_ptr: usize, mode: Option<Mode>) -> isize {
             let param_value = self.program[param_ptr];
             match mode.unwrap_or(Mode::Position) {
@@ -171,4 +202,5 @@ pub mod intcode {
             }
         }
     }
+
 }
