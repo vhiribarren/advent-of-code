@@ -2,6 +2,9 @@
 
 My participation to: https://adventofcode.com/
 
+> [!NOTE]
+> No AI agent is used in this repository. It would defeat its purpose.
+
 ## Caveats
 
 Since all the materials from Advent of Code is not free of use, test inputs and
@@ -16,7 +19,7 @@ folder.
 
 My personal solutions are published under the MIT license.
 
-Copyright 2022-2025 Vincent Hiribarreen
+Copyright 2022-2026 Vincent Hiribarreen
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
