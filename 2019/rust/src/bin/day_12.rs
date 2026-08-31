@@ -1,12 +1,12 @@
 use std::{
-    dbg,
     error::Error,
     fs,
     path::{Path, PathBuf},
     sync::LazyLock,
-    unimplemented, vec,
+    vec,
 };
 
+use num_integer::lcm;
 use regex::Regex;
 
 const INPUT_FILENAME: &str = "day_12.txt";
@@ -24,38 +24,42 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-type Triple = [isize; 3];
+type Triple = [i128; 3];
+
+fn next_state(moons_pos: &mut [Triple], moons_speed: &mut [Triple]) {
+    let moon_count = moons_pos.len();
+    let mut moons_gravity = vec![[0; 3]; moons_pos.len()];
+    for i in 0..moon_count {
+        let curr_moon_pos = &moons_pos[i];
+        for j in 0..moon_count {
+            if i == j {
+                continue;
+            }
+            let adj_moon_pos = &moons_pos[j];
+            for k in 0..3 {
+                moons_gravity[i][k] += if curr_moon_pos[k] < adj_moon_pos[k] {
+                    1
+                } else if curr_moon_pos[k] > adj_moon_pos[k] {
+                    -1
+                } else {
+                    0
+                };
+            }
+        }
+    }
+    for i in 0..moon_count {
+        for k in 0..3 {
+            moons_speed[i][k] += moons_gravity[i][k];
+            moons_pos[i][k] += moons_speed[i][k];
+        }
+    }
+}
 
 fn problem_1(input: &str) -> Result<String, Box<dyn Error>> {
     let mut moons_pos = parse_input(input);
     let mut moons_speed = vec![[0; 3]; moons_pos.len()];
-    let moon_count = moons_pos.len();
     for _ in 0..1000 {
-        let mut moons_gravity = vec![[0; 3]; moons_pos.len()];
-        for i in 0..moon_count {
-            let curr_moon_pos = &moons_pos[i];
-            for j in 0..moon_count {
-                if i == j {
-                    continue;
-                }
-                let adj_moon_pos = &moons_pos[j];
-                for k in 0..3 {
-                    moons_gravity[i][k] += if curr_moon_pos[k] < adj_moon_pos[k] {
-                        1
-                    } else if curr_moon_pos[k] > adj_moon_pos[k] {
-                        -1
-                    } else {
-                        0
-                    };
-                }
-            }
-        }
-        for i in 0..moon_count {
-            for k in 0..3 {
-                moons_speed[i][k] += moons_gravity[i][k];
-                moons_pos[i][k] += moons_speed[i][k];
-            }
-        }
+        next_state(&mut moons_pos, &mut moons_speed);
     }
     let pot = moons_pos
         .into_iter()
@@ -65,15 +69,39 @@ fn problem_1(input: &str) -> Result<String, Box<dyn Error>> {
         .into_iter()
         .map(|p| p.into_iter().fold(0, |acc, v| acc + v.abs()))
         .collect::<Vec<_>>();
-    let result = pot
-        .into_iter()
-        .zip(kin.into_iter())
-        .fold(0, |acc, v| acc + v.0 * v.1);
+    let result = pot.into_iter().zip(kin).fold(0, |acc, v| acc + v.0 * v.1);
     Ok(result.to_string())
 }
 
 fn problem_2(input: &str) -> Result<String, Box<dyn Error>> {
-    unimplemented!()
+    let mut moons_pos = parse_input(input);
+    let mut moons_speed = vec![[0; 3]; moons_pos.len()];
+    let init_moons_pos = moons_pos.clone();
+    let init_moons_speed = moons_speed.clone();
+    let moon_count = moons_pos.len();
+    let mut moon_cycles: [Option<i128>; 3] = [None; 3];
+    for loop_idx in 1.. {
+        next_state(&mut moons_pos, &mut moons_speed);
+        for axis_idx in 0..3 {
+            if moon_cycles[axis_idx].is_none()
+                && (0..moon_count).all(|moon_idx| {
+                    moons_pos[moon_idx][axis_idx] == init_moons_pos[moon_idx][axis_idx]
+                        && moons_speed[moon_idx][axis_idx] == init_moons_speed[moon_idx][axis_idx]
+                })
+            {
+                moon_cycles[axis_idx] = Some(loop_idx);
+            }
+        }
+        if moon_cycles.iter().all(|v| v.is_some()) {
+            break;
+        }
+    }
+    let state_lcm = moon_cycles
+        .into_iter()
+        .map(Option::unwrap)
+        .reduce(lcm)
+        .unwrap();
+    Ok(state_lcm.to_string())
 }
 
 fn parse_input(input: &str) -> Vec<Triple> {
