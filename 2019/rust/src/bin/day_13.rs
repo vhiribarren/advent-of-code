@@ -4,7 +4,7 @@ use std::{
     path::{Path, PathBuf},
     println,
     sync::LazyLock,
-    unimplemented, vec,
+    vec,
 };
 
 const INPUT_FILENAME: &str = "day_13.txt";
@@ -22,28 +22,47 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn compute_block_count(input: &str) -> usize {
+fn problem_1(input: &str) -> Result<String, Box<dyn Error>> {
     let computer = &mut intcode::IntCodeComputer::from_input(input);
     let outputs = computer
         .run_program(vec![])
         .into_iter()
         .map(|v| v.0)
         .collect::<Vec<_>>();
-    outputs
-        .into_iter()
-        .skip(2)
-        .step_by(3)
-        .filter(|v| *v == 2)
-        .count()
-}
-
-fn problem_1(input: &str) -> Result<String, Box<dyn Error>> {
-    let block_count = compute_block_count(input);
-    Ok(block_count.to_string())
+    let result = outputs.chunks(3).filter(|v| v[2] == 2).count();
+    Ok(result.to_string())
 }
 
 fn problem_2(input: &str) -> Result<String, Box<dyn Error>> {
-    unimplemented!()
+    let computer = &mut intcode::IntCodeComputer::from_input(input);
+    computer
+        .program
+        .insert(intcode::Addr(0), intcode::IntCode(2));
+    let mut joystick_dir = 0;
+    let mut score = 0;
+    loop {
+        let outputs = computer
+            .run_program(vec![joystick_dir])
+            .into_iter()
+            .map(|v| v.0)
+            .collect::<Vec<_>>();
+        if let Some(s) = outputs.chunks(3).find(|c| c[0] == -1 && c[1] == 0) {
+            score = s[2];
+        }
+        if computer.is_halted() {
+            break;
+        }
+        let ball_pos = outputs.chunks(3).find(|v| v[2] == 4).unwrap();
+        let paddle_pos = outputs.chunks(3).find(|v| v[2] == 3).unwrap();
+        joystick_dir = if ball_pos[0] > paddle_pos[0] {
+            1
+        } else if ball_pos[0] < paddle_pos[0] {
+            -1
+        } else {
+            0
+        };
+    }
+    Ok(score.to_string())
 }
 
 // IntCode computer
