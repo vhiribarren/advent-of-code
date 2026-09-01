@@ -31,6 +31,7 @@ fn next_state(moons_pos: &mut [Triple], moons_speed: &mut [Triple]) {
     let mut moons_gravity = vec![[0; 3]; moons_pos.len()];
     for i in 0..moon_count {
         let curr_moon_pos = &moons_pos[i];
+        #[allow(clippy::needless_range_loop)]
         for j in 0..moon_count {
             if i == j {
                 continue;
@@ -92,7 +93,7 @@ fn problem_2(input: &str) -> Result<String, Box<dyn Error>> {
                 moon_cycles[axis_idx] = Some(loop_idx);
             }
         }
-        if moon_cycles.iter().all(|v| v.is_some()) {
+        if moon_cycles.iter().all(Option::is_some) {
             break;
         }
     }
