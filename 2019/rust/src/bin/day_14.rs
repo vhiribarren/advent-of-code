@@ -5,7 +5,6 @@ use std::{
     path::{Path, PathBuf},
     println,
     sync::LazyLock,
-    unimplemented,
 };
 
 const INPUT_FILENAME: &str = "day_14.txt";
@@ -56,7 +55,20 @@ fn problem_1(input: &str) -> Result<String, Box<dyn Error>> {
 }
 
 fn problem_2(input: &str) -> Result<String, Box<dyn Error>> {
-    unimplemented!()
+    let elements = parse_input(input);
+    let target = 1_000_000_000_000usize;
+    let (mut left, mut right) = (1usize, 10_000_000_000_000usize);
+    while left < right {
+        let mid = left + (right - left).div_ceil(2);
+        let leftovers = &mut HashMap::<String, usize>::new();
+        let ore = scan_elem(&String::from("FUEL"), mid, &elements, leftovers);
+        if ore > target {
+            right = mid - 1;
+        } else {
+            left = mid;
+        }
+    }
+    Ok(left.to_string())
 }
 
 #[derive(Debug, Hash, PartialEq, PartialOrd, Ord, Eq)]
