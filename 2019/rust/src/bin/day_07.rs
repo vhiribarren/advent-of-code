@@ -1,5 +1,8 @@
 use std::{
-    error::Error, fs, path::{Path, PathBuf}, sync::LazyLock,
+    error::Error,
+    fs,
+    path::{Path, PathBuf},
+    sync::LazyLock,
 };
 
 use itertools::Itertools;
@@ -100,7 +103,11 @@ pub mod intcode {
                 .collect();
             let inst_ptr = 0;
             let halted = false;
-            Self { program, inst_ptr, halted }
+            Self {
+                program,
+                inst_ptr,
+                halted,
+            }
         }
 
         pub fn is_halted(&self) -> bool {
@@ -175,8 +182,8 @@ pub mod intcode {
                     }
                     OP_HALT => {
                         self.halted = true;
-                        break
-                    },
+                        break;
+                    }
                     _ => unimplemented!(),
                 }
             }
@@ -202,5 +209,4 @@ pub mod intcode {
             }
         }
     }
-
 }

@@ -1,5 +1,9 @@
 use std::{
-    error::Error, fs, path::{Path, PathBuf}, sync::LazyLock, vec,
+    error::Error,
+    fs,
+    path::{Path, PathBuf},
+    sync::LazyLock,
+    vec,
 };
 
 use itertools::Itertools;
@@ -32,7 +36,11 @@ fn problem_2(input: &str) -> Result<String, Box<dyn Error>> {
 }
 
 pub mod intcode {
-    use std::{collections::{HashMap, VecDeque}, ops::{Add, AddAssign}, unreachable, vec};
+    use std::{
+        collections::{HashMap, VecDeque},
+        ops::{Add, AddAssign},
+        unreachable, vec,
+    };
 
     pub type Value = i128;
     #[derive(Clone, Eq, PartialEq, PartialOrd, Hash, Copy, Debug)]
@@ -48,11 +56,11 @@ pub mod intcode {
             Self(self.0 + rhs as u128)
         }
     }
-    impl AddAssign<usize> for Addr{
+    impl AddAssign<usize> for Addr {
         fn add_assign(&mut self, rhs: usize) {
             *self = Self(self.0 + rhs as u128);
         }
-}
+    }
 
     #[derive(Debug, Clone)]
     enum Mode {
@@ -101,7 +109,12 @@ pub mod intcode {
             let inst_ptr = Addr(0);
             let halted = false;
             let rel_base = 0;
-            Self { program, inst_ptr, halted, rel_base }
+            Self {
+                program,
+                inst_ptr,
+                halted,
+                rel_base,
+            }
         }
 
         pub fn is_halted(&self) -> bool {
@@ -123,14 +136,16 @@ pub mod intcode {
                         let val_left = self.fetch_resolved_intcode(params_ptr, modes.pop());
                         let val_right = self.fetch_resolved_intcode(params_ptr + 1, modes.pop());
                         let dest_idx = self.fetch_resolved_addr(params_ptr + 2, modes.pop());
-                        self.program.insert(dest_idx, IntCode(val_left.0 + val_right.0));
+                        self.program
+                            .insert(dest_idx, IntCode(val_left.0 + val_right.0));
                         self.inst_ptr += 4;
                     }
                     OP_MULTIPLY => {
                         let val_left = self.fetch_resolved_intcode(params_ptr, modes.pop());
                         let val_right = self.fetch_resolved_intcode(params_ptr + 1, modes.pop());
                         let dest_idx = self.fetch_resolved_addr(params_ptr + 2, modes.pop());
-                        self.program.insert(dest_idx, IntCode(val_left.0 * val_right.0));
+                        self.program
+                            .insert(dest_idx, IntCode(val_left.0 * val_right.0));
                         self.inst_ptr += 4;
                     }
                     OP_INPUT => {
@@ -138,7 +153,8 @@ pub mod intcode {
                             break;
                         }
                         let dest_idx = self.fetch_resolved_addr(params_ptr, modes.pop());
-                        self.program.insert(dest_idx, IntCode(input.pop_front().unwrap()));
+                        self.program
+                            .insert(dest_idx, IntCode(input.pop_front().unwrap()));
                         self.inst_ptr += 2;
                     }
                     OP_OUTPUT => {
@@ -148,7 +164,8 @@ pub mod intcode {
                     }
                     OP_JUMP_IF_TRUE => {
                         let test = self.fetch_resolved_intcode(params_ptr, modes.pop());
-                        let new_inst_ptr = self.fetch_resolved_intcode(params_ptr + 1, modes.pop()).0;
+                        let new_inst_ptr =
+                            self.fetch_resolved_intcode(params_ptr + 1, modes.pop()).0;
                         self.inst_ptr = if test.0 != 0 {
                             Addr(new_inst_ptr as u128)
                         } else {
@@ -157,7 +174,8 @@ pub mod intcode {
                     }
                     OP_JUMP_IF_FALSE => {
                         let test = self.fetch_resolved_intcode(params_ptr, modes.pop());
-                        let new_inst_ptr = self.fetch_resolved_intcode(params_ptr + 1, modes.pop()).0;
+                        let new_inst_ptr =
+                            self.fetch_resolved_intcode(params_ptr + 1, modes.pop()).0;
                         self.inst_ptr = if test.0 == 0 {
                             Addr(new_inst_ptr as u128)
                         } else {
@@ -168,14 +186,28 @@ pub mod intcode {
                         let val_left = self.fetch_resolved_intcode(params_ptr, modes.pop());
                         let val_right = self.fetch_resolved_intcode(params_ptr + 1, modes.pop());
                         let dest_idx = self.fetch_resolved_addr(params_ptr + 2, modes.pop());
-                        self.program.insert(dest_idx, if val_left < val_right { IntCode(1) } else { IntCode(0) });
+                        self.program.insert(
+                            dest_idx,
+                            if val_left < val_right {
+                                IntCode(1)
+                            } else {
+                                IntCode(0)
+                            },
+                        );
                         self.inst_ptr += 4
                     }
                     OP_EQUALS => {
                         let val_left = self.fetch_resolved_intcode(params_ptr, modes.pop());
                         let val_right = self.fetch_resolved_intcode(params_ptr + 1, modes.pop());
                         let dest_idx = self.fetch_resolved_addr(params_ptr + 2, modes.pop());
-                        self.program.insert(dest_idx, if val_left == val_right { IntCode(1) } else { IntCode(0) });
+                        self.program.insert(
+                            dest_idx,
+                            if val_left == val_right {
+                                IntCode(1)
+                            } else {
+                                IntCode(0)
+                            },
+                        );
                         self.inst_ptr += 4
                     }
                     OP_BASE_ADJUST => {
@@ -185,8 +217,8 @@ pub mod intcode {
                     }
                     OP_HALT => {
                         self.halted = true;
-                        break
-                    },
+                        break;
+                    }
                     _ => unimplemented!(),
                 }
             }
@@ -218,11 +250,9 @@ pub mod intcode {
             let candidate_addr = self.get_intcode(addr);
             match mode.unwrap() {
                 Mode::Position => Addr(candidate_addr.0 as u128),
-                Mode::Relative => Addr((candidate_addr.0 + self.rel_base) as u128), 
-                _ => unreachable!()
+                Mode::Relative => Addr((candidate_addr.0 + self.rel_base) as u128),
+                _ => unreachable!(),
             }
         }
-
     }
-
 }

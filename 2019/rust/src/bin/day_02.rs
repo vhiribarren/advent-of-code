@@ -1,4 +1,4 @@
-use std::{error::Error, cmp, fs, path::Path};
+use std::{cmp, error::Error, fs, path::Path};
 
 const INPUT_PATH_REL: &str = "../../../inputs/day_02.txt";
 const SRC_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/", file!());
@@ -28,7 +28,7 @@ fn problem_2(input: &str) -> String {
             program[1] = noun;
             program[2] = verb;
             if compute_result(program) == TARGET {
-                return (100*noun + verb).to_string();
+                return (100 * noun + verb).to_string();
             }
         }
     }
@@ -44,13 +44,13 @@ fn compute_result(mut program: Vec<usize>) -> usize {
     loop {
         match program[inst_ptr] {
             1 => {
-                let dest_idx = program[inst_ptr+3];
-                program[dest_idx] = program[program[inst_ptr+1]] + program[program[inst_ptr+2]];
+                let dest_idx = program[inst_ptr + 3];
+                program[dest_idx] = program[program[inst_ptr + 1]] + program[program[inst_ptr + 2]];
                 inst_ptr += 4
             }
             2 => {
-                let dest_idx = program[inst_ptr+3];
-                program[dest_idx] = program[program[inst_ptr+1]] * program[program[inst_ptr+2]];
+                let dest_idx = program[inst_ptr + 3];
+                program[dest_idx] = program[program[inst_ptr + 1]] * program[program[inst_ptr + 2]];
                 inst_ptr += 4
             }
             99 => break,
