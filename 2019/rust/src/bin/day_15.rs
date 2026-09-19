@@ -5,7 +5,6 @@ use std::{
     path::{Path, PathBuf},
     println,
     sync::LazyLock,
-    unimplemented, unreachable, vec,
 };
 
 const INPUT_FILENAME: &str = "day_15.txt";
@@ -82,6 +81,7 @@ fn scan_grid(
     computer: &mut intcode::IntCodeComputer,
     predecessors: &mut Predecessors,
 ) -> Option<Coords> {
+    let mut oxygen_coords = None;
     for command in COMMANDS {
         let next_hop = next_hop(coords, command);
         if predecessors.contains_key(&next_hop) {
@@ -106,12 +106,13 @@ fn scan_grid(
             }
             OUT_OXYGEN => {
                 predecessors.insert(next_hop, Some(coords));
-                return Some(next_hop);
+                oxygen_coords = Some(next_hop);
+                computer.run_program(vec![revert_command(command)]);
             }
             _ => unreachable!(),
         }
     }
-    None
+    oxygen_coords
 }
 
 fn problem_1(input: &str) -> Result<String, Box<dyn Error>> {
